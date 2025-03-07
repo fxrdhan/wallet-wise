@@ -74,6 +74,10 @@ export default {
             return this.$store.getters.sortedTransactions;
         }
     },
+    mounted() {
+        // Scroll ke atas halaman saat komponen dimuat
+        window.scrollTo(0, 0);
+    },
     methods: {
         formatNumber(number) {
             return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
