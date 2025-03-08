@@ -116,7 +116,7 @@ export default {
         return {
             filterType: 'all',
             filterOptions: [
-                { value: 'all', label: 'Riwayat', icon: 'fas fa-list text-gray-500' },
+                { value: 'all', label: 'Semua', icon: 'fas fa-list text-gray-500' },
                 { value: 'income', label: 'Pemasukan', icon: 'fas fa-arrow-down text-green-500' },
                 { value: 'expense', label: 'Pengeluaran', icon: 'fas fa-arrow-up text-red-500' },
                 { value: 'transfer', label: 'Transfer', icon: 'fas fa-exchange-alt text-blue-500' }
