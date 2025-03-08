@@ -82,12 +82,14 @@
                     <div class="flex justify-between items-start">
                         <div class="flex-1 mr-4">
                             <h3 class="font-medium text-gray-900">{{ transaction.description }}</h3>
-                            <p class="text-xs text-gray-400">{{ formatDateSimple(transaction.date) }}</p>
                             <p class="text-sm text-gray-500 capitalize">{{ getTransactionDetails(transaction) }}</p>
                         </div>
                         <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
                             {{ getAmountPrefix(transaction.type) }} Rp {{ formatNumber(getTransactionTotal(transaction)) }}
                         </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <p class="text-xs text-gray-400 mt-2">{{ formatDateSimple(transaction.date) }}</p>
                     </div>
                   </div>
                   <div class="action-sticks-container">
@@ -153,8 +155,7 @@ export default {
         },
         getTransactionDetails(transaction) {
             if (transaction.type === 'transfer') {
-                let details = `Transfer ke ${transaction.recipient || 'Penerima'} via ${this.capitalizeFirstLetter(transaction.platform || 'bank')}`;
-                return details;
+                return 'Transfer';
             }
             return this.capitalizeFirstLetter(transaction.category || '');
         },
