@@ -43,6 +43,9 @@ export default {
 <style scoped>
 /* All screen sizes */
 .menuItems {
+    transform: translateY(0);
+    isolation: isolate;
+    overflow: visible !important;
     position: absolute !important; 
     z-index: 1000 !important;
     max-height: 80vh;

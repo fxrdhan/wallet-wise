@@ -4,10 +4,10 @@
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
             <div class="flex items-center justify-between mb-6 relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800 flex-shrink-0">{{ filterTitle }}</h2>
-                <div class="flex space-x-3 mt-2 sm:mt-0 justify-end">
+                <div class="flex space-x-3 mt-2 sm:mt-0 justify-end relative z-20">
                     <DropdownMenu class="icon-only-dropdown">
                         <template #button-content>
-                            <i class="fas fa-filter"></i>
+                            <i class="fas fa-filter relative z-20"></i>
                         </template>
                         <MenuItem v-slot="{ active }" v-for="option in filterOptions" :key="option.value">
                             <button @click="filterByType(option.value)" 
@@ -18,7 +18,7 @@
                     </DropdownMenu>
                     <DropdownMenu class="icon-only-dropdown">
                         <template #button-content>
-                            <i class="fas fa-download"></i>
+                            <i class="fas fa-download relative z-20"></i>
                         </template>
                         <!-- Add export menu items here -->
                     </DropdownMenu>
@@ -26,7 +26,7 @@
             </div>
 
             <!-- Desktop view: Table (changed z-index from 10 to 5) -->
-            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-10 hidden md:block">
+            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-5 hidden md:block">
                 <table class="w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -73,7 +73,7 @@
             </div>
             
             <!-- Mobile view: Card list -->
-            <div class="md:hidden space-y-4 relative z-10">
+            <div class="md:hidden space-y-4 relative z-5">
                 <div v-if="transactions.length === 0" class="text-center py-4 text-sm text-gray-500">
                     Belum ada transaksi.
                 </div>
@@ -222,7 +222,8 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
 
 .transaction-history :deep(.menuItems) {
     position: absolute !important;
-    top: auto !important;
+    top: 100% !important;
+    transform: translateY(1px);
     right: 0 !important;
     z-index: 1000 !important;
 }
