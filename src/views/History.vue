@@ -201,7 +201,6 @@ export default {
 /* Icon at the bottom of the card */
 i.fas.fa-history.text-gray-100 { z-index: 1; }
 
-/* Container for dropdown menus */
 .flex.space-x-2 {
     position: relative;
 }
@@ -218,7 +217,6 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     }
 }
 
-/* Force dropdown to appear above everything else in this component */
 .transaction-history :deep(.menuItems) {
     position: absolute !important;
     top: auto !important;
@@ -226,7 +224,6 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     z-index: 1000 !important;
 }
 
-/* Icon-only dropdown styling - removed box/container */
 .icon-only-dropdown :deep(.fas.fa-chevron-down) {
     display: none;
 }
@@ -247,7 +244,6 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     color: #374151; /* gray-700 */
 }
 
-/* Force dropdown to appear above everything else in this component */
 .icon-only-dropdown :deep(.menuItems) {
     position: absolute !important;
     right: 0 !important;
@@ -257,7 +253,6 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     width: 180px !important;
 }
 
-/* Ensure menu items are properly displayed with larger clickable area */
 .icon-only-dropdown :deep(.menuItems button) {
     display: block;
     width: 100%;
