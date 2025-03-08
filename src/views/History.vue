@@ -1,13 +1,13 @@
 <!-- src/views/History.vue -->
 <template>
-    <div>
+    <div class="transaction-history">
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
             <div class="flex items-center justify-between mb-6 relative z-10">
-                <h2 class="text-xl font-semibold text-gray-800">Riwayat Transaksi</h2>
-                <div class="flex space-x-2">
+                <h2 class="text-xl font-semibold text-gray-800">{{ filterTitle }}</h2>
+                <div class="flex space-x-2 mt-2 sm:mt-0 flex-wrap justify-end">
                     <DropdownMenu>
                         <template #button-content>
-                            <i class="fas fa-filter mr-1"></i> Filter
+                            <span class="whitespace-nowrap"><i class="fas fa-filter mr-1"></i> Filter</span>
                         </template>
                         <MenuItem v-slot="{ active }" v-for="option in filterOptions" :key="option.value">
                             <button @click="filterByType(option.value)" 
@@ -25,8 +25,9 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-10">
-                <table class="min-w-full divide-y divide-gray-200">
+            <!-- Desktop view: Table -->
+            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-10 hidden md:block">
+                <table class="w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -70,6 +71,34 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Mobile view: Card list -->
+            <div class="md:hidden space-y-4 relative z-10">
+                <div v-if="transactions.length === 0" class="text-center py-4 text-sm text-gray-500">
+                    Belum ada transaksi.
+                </div>
+                <div v-for="transaction in transactions" :key="transaction.id" 
+                    class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 mr-4">
+                            <h3 class="font-medium text-gray-900">{{ transaction.description }}</h3>
+                            <p class="text-sm text-gray-500">{{ formatDateSimple(transaction.date) }}</p>
+                            <p class="text-sm text-gray-500 capitalize">{{ getTransactionDetails(transaction) }}</p>
+                        </div>
+                        <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
+                            {{ getAmountPrefix(transaction.type) }} Rp {{ formatNumber(getTransactionTotal(transaction)) }}
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-gray-100 flex justify-end space-x-3">
+                        <button class="text-blue-600 hover:text-blue-900 p-2" @click="editTransaction(transaction.id)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="text-red-600 hover:text-red-900 p-2" @click="deleteTransaction(transaction.id)">
+                            <i class="fas fa-trash-alt"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <i class="fas fa-history text-gray-100 opacity-5 absolute -bottom-10 -right-10 text-9xl"></i>
         </div>
@@ -95,7 +124,18 @@ export default {
         }
     },
     computed: {
+        filterTitle() {
+            if (this.filterType === 'all') {
+                return 'Semua Transaksi';
+            } else {
+                const option = this.filterOptions.find(opt => opt.value === this.filterType);
+                return option ? option.label : 'Riwayat Transaksi';
+            }
+        },
         transactions() {
+            if (this.filterType !== 'all') {
+                return this.$store.getters.sortedTransactions.filter(t => t.type === this.filterType);
+            }
             return this.$store.getters.sortedTransactions;
         }
     },
@@ -133,6 +173,9 @@ export default {
         getAmountPrefix(type) {
             return type === 'income' ? '+' : '-';
         },
+        filterByType(type) {
+            this.filterType = type;
+        },
         capitalizeFirstLetter(string) {
             if (!string) return '';
             return string.charAt(0).toUpperCase() + string.slice(1);
@@ -148,3 +191,19 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .transaction-history .flex.items-center.justify-between {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .transaction-history .flex.items-center.justify-between .flex.space-x-2 {
+        margin-top: 0.75rem;
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+</style>

@@ -1,46 +1,32 @@
 <!-- src/components/Header.vue -->
 <template>
-    <div class="navbar-bottom">
-        <button class="add-button" @click="openModal">
-            <i class="fas fa-plus"></i>
-        </button>
-        <div class="flex justify-around items-center pt-2">
-            <router-link to="/" class="flex flex-col items-center" :class="getNavLinkClass('/')">
-                <i class="fas fa-home text-xl"></i>
-                <span class="text-xs mt-1">Beranda</span>
-            </router-link>
-            <router-link to="/statistics" class="flex flex-col items-center" :class="getNavLinkClass('/statistics')">
-                <i class="fas fa-chart-pie text-xl"></i>
-                <span class="text-xs mt-1">Statistik</span>
-            </router-link>
-            <div class="w-16"></div>
-            <!-- Placeholder -->
-            <router-link to="/history" class="flex flex-col items-center" :class="getNavLinkClass('/history')">
-                <i class="fas fa-calendar-alt text-xl"></i>
-                <span class="text-xs mt-1">Riwayat</span>
-            </router-link>
-            <router-link to="/profile" class="flex flex-col items-center" :class="getNavLinkClass('/profile')">
-                <i class="fas fa-user text-xl"></i>
-                <span class="text-xs mt-1">Profil</span>
-            </router-link>
+    <header class="mb-4 pt-4 transition-all overflow-hidden">
+        <div class="p-4 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <div class="flex items-center">
+                    <i class="fas fa-wallet text-green-600 text-3xl mr-3"></i>
+                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">Wallet Wise</h1>
+                </div>
+                <p class="text-gray-400 mt-1 text-sm ml-4">Aplikasi kelola keuangan Anda</p>
+            </div>
+            <div class="mt-4 md:mt-0 bg-green-50 px-4 py-2 rounded-lg border border-green-100">
+                <p class="text-green-700 text-sm"><i class="far fa-calendar-alt mr-1"></i> <span>{{ currentDate }}</span></p>
+            </div>
         </div>
-    </div>
+    </header>
 </template>
 
 <script>
 export default {
     name: "AppNavbar",
-    methods: {
-        getNavLinkClass(route) {
-            return {
-                "text-green-600 opacity-90 hover:opacity-100":
-                    this.$route.path === route,
-                "text-gray-400 hover:text-green-600": this.$route.path !== route,
-            };
-        },
-        openModal() {
-            this.$store.dispatch("showModal");
-        },
+    data() {
+        return {
+            currentDate: ""
+        }
     },
-};
+    mounted() {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        this.currentDate = new Date().toLocaleDateString('id-ID', options);
+    }
+}
 </script>
