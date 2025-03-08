@@ -1,3 +1,4 @@
+<!-- src/views/Home.vue -->
 <template>
     <div>
         <!-- Dashboard Cards -->
@@ -7,7 +8,7 @@
                 <div class="flex flex-col card-content relative z-10">
                     <h2 class="text-lg font-semibold text-white opacity-90">Saldo Saat Ini</h2>
                     <p class="text-3xl font-bold mt-4">Rp {{ formatNumber(balance) }}</p>
-                    <p class="text-sm text-white opacity-70 mt-2">Update terakhir: {{ lastUpdate }}</p>
+                    <p class="text-sm text-white opacity-70 mt-2" v-if="isClient">Update terakhir: {{ lastUpdate }}</p>
                 </div>
                 <i class="fas fa-wallet card-icon"></i>
             </div>
@@ -59,7 +60,7 @@
                         </div>
                         <div>
                             <h3 class="font-medium">{{ transaction.description }}</h3>
-                            <p class="text-sm text-gray-500">{{ formatDate(transaction.date) }}</p>
+                            <p class="text-sm text-gray-500">{{ formatDateSimple(transaction.date) }}</p>
                         </div>
                     </div>
                     <div :class="getAmountClass(transaction.type)" class="text-lg font-bold">
@@ -84,6 +85,11 @@
 <script>
 export default {
     name: 'HomeView',
+    data() {
+        return {
+            isClient: false
+        }
+    },
     computed: {
         income() {
             return this.$store.getters.income;
@@ -104,13 +110,31 @@ export default {
             return this.$store.getters.sortedTransactions.slice(0, 5);
         }
     },
+    mounted() {
+        this.isClient = true;
+    },
     methods: {
         formatNumber(number) {
-            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            // Gunakan pendekatan yang lebih konsisten untuk format angka
+            return number.toLocaleString('id-ID').replace(/,/g, ".");
         },
         formatDate(date) {
+            // Fungsi ini masih ada untuk kompatibilitas
             const d = new Date(date);
-            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            try {
+                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            } catch (e) {
+                return this.formatDateSimple(date);
+            }
+        },
+        formatDateSimple(date) {
+            // Fungsi format tanggal yang lebih konsisten antara server dan client
+            const d = new Date(date);
+            const day = d.getDate();
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const month = months[d.getMonth()];
+            const year = d.getFullYear();
+            return `${day} ${month} ${year}`;
         },
         getTypeIcon(type) {
             const icons = {

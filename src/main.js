@@ -2,10 +2,13 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import './output.css'
-import '@fortawesome/fontawesome-free/css/all.min.css'
+import ClientOnly from './directives/ClientOnly'
 
 const app = createApp(App)
-app.use(router)
+
+// Register custom directive
+app.directive('client-only', ClientOnly)
+
 app.use(store)
+app.use(router)
 app.mount('#app')

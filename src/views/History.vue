@@ -1,3 +1,4 @@
+<!-- src/views/History.vue -->
 <template>
     <div>
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
@@ -36,7 +37,7 @@
                             <td class="px-6 py-4 text-sm text-gray-500" colspan="5">Belum ada transaksi.</td>
                         </tr>
                         <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ transaction.date }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDateSimple(transaction.date) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
                                 transaction.description }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
@@ -74,13 +75,18 @@ export default {
             return this.$store.getters.sortedTransactions;
         }
     },
-    mounted() {
-        // Scroll ke atas halaman saat komponen dimuat
-        window.scrollTo(0, 0);
-    },
     methods: {
         formatNumber(number) {
-            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return number.toLocaleString('id-ID').replace(/,/g, ".");
+        },
+        formatDateSimple(date) {
+            // Fungsi format tanggal yang lebih konsisten antara server dan client
+            const d = new Date(date);
+            const day = d.getDate();
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const month = months[d.getMonth()];
+            const year = d.getFullYear();
+            return `${day} ${month} ${year}`;
         },
         getTransactionDetails(transaction) {
             if (transaction.type === 'transfer') {

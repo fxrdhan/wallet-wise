@@ -1,3 +1,4 @@
+<!-- src/components/Header.vue -->
 <template>
     <div class="navbar-bottom">
         <button class="add-button" @click="openModal">

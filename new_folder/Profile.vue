@@ -1,3 +1,4 @@
+<!-- src/views/Profile.vue -->
 <template>
     <div>
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">

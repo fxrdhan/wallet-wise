@@ -1,3 +1,4 @@
+<!-- src/components/TransactionModal.vue -->
 <template>
     <div id="transactionModal" class="modal" :style="{ display: showModal ? 'block' : 'none' }">
         <div class="modal-content p-6">
