@@ -4,21 +4,21 @@
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
             <div class="flex items-center justify-between mb-6 relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800 flex-shrink-0">{{ filterTitle }}</h2>
-                <div class="flex space-x-2 mt-2 sm:mt-0 flex-wrap justify-end">
-                    <DropdownMenu>
+                <div class="flex space-x-3 mt-2 sm:mt-0 justify-end">
+                    <DropdownMenu class="icon-only-dropdown">
                         <template #button-content>
-                            <span class="whitespace-nowrap"><i class="fas fa-filter mr-1"></i> Filter</span>
+                            <i class="fas fa-filter"></i>
                         </template>
                         <MenuItem v-slot="{ active }" v-for="option in filterOptions" :key="option.value">
                             <button @click="filterByType(option.value)" 
-                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-2 text-left text-sm']">
+                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
                                 <i :class="option.icon" class="mr-2"></i> {{ option.label }}
                             </button>
                         </MenuItem>
                     </DropdownMenu>
-                    <DropdownMenu>
+                    <DropdownMenu class="icon-only-dropdown">
                         <template #button-content>
-                            <i class="fas fa-download mr-1"></i> Ekspor
+                            <i class="fas fa-download"></i>
                         </template>
                         <!-- Add export menu items here -->
                     </DropdownMenu>
@@ -116,7 +116,7 @@ export default {
         return {
             filterType: 'all',
             filterOptions: [
-                { value: 'all', label: 'Semua Transaksi', icon: 'fas fa-list text-gray-500' },
+                { value: 'all', label: 'Riwayat', icon: 'fas fa-list text-gray-500' },
                 { value: 'income', label: 'Pemasukan', icon: 'fas fa-arrow-down text-green-500' },
                 { value: 'expense', label: 'Pengeluaran', icon: 'fas fa-arrow-up text-red-500' },
                 { value: 'transfer', label: 'Transfer', icon: 'fas fa-exchange-alt text-blue-500' }
@@ -126,7 +126,7 @@ export default {
     computed: {
         filterTitle() {
             if (this.filterType === 'all') {
-                return 'Semua Transaksi';
+                return 'Riwayat';
             } else {
                 const option = this.filterOptions.find(opt => opt.value === this.filterType);
                 return option ? option.label : 'Riwayat Transaksi';
@@ -195,16 +195,20 @@ export default {
 <style scoped>
 /* Responsive adjustments */
 :deep(.absolute) {
-    z-index: 100 !important; /* Ensure dropdown is above all other elements */
+    z-index: 1000 !important; /* Increase z-index to ensure dropdown is above all other elements */
 }
 
 /* Icon at the bottom of the card */
 i.fas.fa-history.text-gray-100 { z-index: 1; }
 
+/* Container for dropdown menus */
+.flex.space-x-2 {
+    position: relative;
+}
+
 @media (max-width: 768px) {
     .transaction-history .flex.items-center.justify-between {
-        flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
     }
     
     .transaction-history .flex.items-center.justify-between .flex.space-x-2 {
@@ -216,6 +220,50 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
 
 /* Force dropdown to appear above everything else in this component */
 .transaction-history :deep(.menuItems) {
-    position: relative !important;
+    position: absolute !important;
+    top: auto !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+}
+
+/* Icon-only dropdown styling - removed box/container */
+.icon-only-dropdown :deep(.fas.fa-chevron-down) {
+    display: none;
+}
+
+.icon-only-dropdown :deep(.menuItems button i) {
+    display: inline-block;
+}
+
+.icon-only-dropdown :deep(button) {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Removed bg-gray-100 and rounded-full classes */
+}
+.icon-only-dropdown :deep(button:hover) {
+    color: #374151; /* gray-700 */
+}
+
+/* Force dropdown to appear above everything else in this component */
+.icon-only-dropdown :deep(.menuItems) {
+    position: absolute !important;
+    right: 0 !important;
+    top: 100% !important;
+    /* left: auto !important; */
+    z-index: 1000 !important;
+    width: 180px !important;
+}
+
+/* Ensure menu items are properly displayed with larger clickable area */
+.icon-only-dropdown :deep(.menuItems button) {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
 }
 </style>
