@@ -20,6 +20,21 @@
             <div v-if="hasTransactions" class="space-y-4">
                 <!-- Row 1: Three main statistic cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Total Pemasukan -->
+                    <div class="card rounded-lg border border-gray-100 p-4 bg-green-50">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="text-sm text-gray-600">Total Pemasukan</h4>
+                                <p class="text-xl font-bold text-green-600">
+                                    Rp {{ formatNumber(totalIncome) }}
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                <i class="fas fa-arrow-down text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Total Pengeluaran -->
                     <div class="card rounded-lg border border-gray-100 p-4 bg-red-50">
                         <div class="flex justify-between items-center">
@@ -35,11 +50,11 @@
                         </div>
                     </div>
 
-                    <!-- Kategori Terbesar -->
+                    <!-- Pengeluaran Terbesar -->
                     <div class="card rounded-lg border border-gray-100 p-4 bg-blue-50">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h4 class="text-sm text-gray-600">Kategori Terbesar</h4>
+                                <h4 class="text-sm text-gray-600">Pengeluaran Terbesar</h4>
                                 <p class="text-xl font-bold text-blue-600 capitalize">
                                     {{ topCategory ? topCategory.category : '-' }}
                                 </p>
@@ -54,16 +69,16 @@
                     </div>
 
                     <!-- Jumlah Transaksi -->
-                    <div class="card rounded-lg border border-gray-100 p-4 bg-green-50">
+                    <div class="card rounded-lg border border-gray-100 p-4 bg-purple-50">
                         <div class="flex justify-between items-center">
                             <div>
                                 <h4 class="text-sm text-gray-600">Jumlah Transaksi</h4>
-                                <p class="text-xl font-bold text-green-600">
+                                <p class="text-xl font-bold text-purple-600">
                                     {{ filteredTransactions.length }}
                                 </p>
                             </div>
-                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                                <i class="fas fa-exchange-alt text-green-600"></i>
+                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                <i class="fas fa-exchange-alt text-purple-600"></i>
                             </div>
                         </div>
                     </div>
@@ -189,11 +204,17 @@ export default {
         expenseTransactions() {
             return this.filteredTransactions.filter(t => t.type === 'expense');
         },
+        incomeTransactions() {
+            return this.filteredTransactions.filter(t => t.type === 'income');
+        },
         hasTransactions() {
-            return this.expenseTransactions.length > 0;
+            return this.filteredTransactions.length > 0;
         },
         totalExpense() {
             return this.expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
+        },
+        totalIncome() {
+            return this.incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
         },
         topCategory() {
             if (!this.hasTransactions) return null;
