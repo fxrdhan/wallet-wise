@@ -238,7 +238,6 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Removed bg-gray-100 and rounded-full classes */
 }
 .icon-only-dropdown :deep(button:hover) {
     color: #374151; /* gray-700 */
@@ -248,7 +247,6 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     position: absolute !important;
     right: 0 !important;
     top: 100% !important;
-    /* left: auto !important; */
     z-index: 1000 !important;
     width: 180px !important;
 }
