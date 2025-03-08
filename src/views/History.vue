@@ -77,26 +77,25 @@
                 <div v-if="transactions.length === 0" class="text-center py-4 text-sm text-gray-500">
                     Belum ada transaksi.
                 </div>
-                <div v-for="transaction in transactions" :key="transaction.id" 
-                    class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                <div v-for="transaction in transactions" :key="transaction.id" class="transaction-card-wrapper mb-6">
+                  <div class="bg-white rounded-t-lg border border-gray-200 shadow-sm p-4 relative overflow-hidden">
                     <div class="flex justify-between items-start">
                         <div class="flex-1 mr-4">
                             <h3 class="font-medium text-gray-900">{{ transaction.description }}</h3>
-                            <p class="text-sm text-gray-500">{{ formatDateSimple(transaction.date) }}</p>
+                            <p class="text-xs text-gray-400">{{ formatDateSimple(transaction.date) }}</p>
                             <p class="text-sm text-gray-500 capitalize">{{ getTransactionDetails(transaction) }}</p>
                         </div>
                         <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
                             {{ getAmountPrefix(transaction.type) }} Rp {{ formatNumber(getTransactionTotal(transaction)) }}
                         </div>
                     </div>
-                    <div class="mt-3 pt-3 border-t border-gray-100 flex justify-end space-x-3">
-                        <button class="text-blue-600 hover:text-blue-900 p-2" @click="editTransaction(transaction.id)">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="text-red-600 hover:text-red-900 p-2" @click="deleteTransaction(transaction.id)">
-                            <i class="fas fa-trash-alt"></i> Hapus
-                        </button>
-                    </div>
+                  </div>
+                  <div class="action-sticks-container">
+                    <!-- Tombol Edit (Stick Oranye di Kiri) -->
+                    <div @click="editTransaction(transaction.id)" class="action-stick edit-stick"></div>
+                    <!-- Tombol Hapus (Stick Merah di Kanan) -->
+                    <div @click="deleteTransaction(transaction.id)" class="action-stick delete-stick"></div>
+                  </div>
                 </div>
             </div>
 
@@ -258,5 +257,52 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     text-align: left;
     cursor: pointer;
     white-space: nowrap;
+}
+
+/* Container untuk transaction card */
+.transaction-card-wrapper {
+    position: relative;
+}
+
+/* Container untuk action sticks */
+.action-sticks-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -3px;
+    position: relative;
+    z-index: 5;
+}
+
+/* Style untuk action sticks */
+.action-stick {
+    height: 5px;
+    width: 40px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 20px;
+    opacity: 0.8;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.action-stick:hover {
+    transform: scaleX(1.1);
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.edit-stick {
+    background-color: #F97316; /* orange-500 */
+}
+
+.edit-stick:hover {
+    background-color: #EA580C; /* orange-600 */
+}
+
+.delete-stick {
+    background-color: #EF4444; /* red-500 */
+}
+
+.delete-stick:hover {
+    background-color: #DC2626; /* red-600 */
 }
 </style>
