@@ -26,7 +26,7 @@
             </div>
 
             <!-- Desktop view: Table (changed z-index from 10 to 5) -->
-            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-5 hidden md:block">
+            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-10 hidden md:block">
                 <table class="w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -57,7 +57,7 @@
                                 {{ getAmountPrefix(transaction.type) }} Rp {{
                                     formatNumber(getTransactionTotal(transaction)) }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium action-buttons">
                                 <button class="text-blue-600 hover:text-blue-900 mr-3"
                                     @click="editTransaction(transaction.id)">
                                     <i class="fas fa-edit"></i>
@@ -73,7 +73,7 @@
             </div>
             
             <!-- Mobile view: Card list -->
-            <div class="md:hidden space-y-4 relative z-5">
+            <div class="md:hidden space-y-4 relative z-10">
                 <div v-if="transactions.length === 0" class="text-center py-4 text-sm text-gray-500">
                     Belum ada transaksi.
                 </div>
@@ -193,8 +193,11 @@ export default {
 
 <style scoped>
 /* Responsive adjustments */
+.transaction-history {
+    padding-bottom: 40px; 
+}
 :deep(.absolute) {
-    z-index: 1000 !important; /* Increase z-index to ensure dropdown is above all other elements */
+    z-index: 1000 !important; 
 }
 
 /* Icon at the bottom of the card */
@@ -259,27 +262,32 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     white-space: nowrap;
 }
 
-/* Container untuk transaction card */
 .transaction-card-wrapper {
     position: relative;
+    margin-bottom: 20px;
 }
 
-/* Container untuk action sticks */
+.transaction-card-wrapper:last-child {
+    margin-bottom: 40px;
+}
+
 .action-sticks-container {
     display: flex;
     justify-content: space-between;
-    margin-top: -3px;
+    margin-top: -5px;
     position: relative;
-    z-index: 5;
+    z-index: 20;
+    padding: 5px 0px;
+    pointer-events: auto;
 }
 
-/* Style untuk action sticks */
 .action-stick {
     height: 5px;
     width: 40px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border-radius: 20px;
+    border-radius: 0 0 20px 20px;
+    pointer-events: auto !important;
     opacity: 0.8;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
@@ -305,4 +313,16 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
 .delete-stick:hover {
     background-color: #DC2626; /* red-600 */
 }
+
+.action-buttons button {
+    cursor: pointer !important;
+    position: relative;
+    z-index: 15;
+}
+
+i.fas.fa-history.text-gray-100 {
+    z-index: 1 !important;
+    pointer-events: none !important;
+}
+
 </style>
