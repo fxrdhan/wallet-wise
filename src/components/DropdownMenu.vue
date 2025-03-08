@@ -16,7 +16,7 @@
             leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100"
             leave-to-class="transform opacity-0 scale-95">
             <MenuItems ref="menuItems"
-                class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+                class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black/5 focus:outline-none menuItems">
                 <div class="py-1">
                     <slot></slot>
                 </div>
@@ -41,12 +41,18 @@ export default {
 </script>
 
 <style scoped>
+/* All screen sizes */
+:deep(.menuItems) {
+    position: absolute !important;
+    z-index: 50 !important;
+}
+
 @media (max-width: 640px) {
     :deep(.absolute) {
         position: fixed !important;
         right: 1rem !important;
+        top: auto !important;
         max-width: calc(100vw - 2rem) !important;
-        z-index: 50 !important;
     }
 }
 </style>

@@ -3,7 +3,7 @@
     <div class="transaction-history">
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
             <div class="flex items-center justify-between mb-6 relative z-10">
-                <h2 class="text-xl font-semibold text-gray-800">{{ filterTitle }}</h2>
+                <h2 class="text-xl font-semibold text-gray-800 flex-shrink-0">{{ filterTitle }}</h2>
                 <div class="flex space-x-2 mt-2 sm:mt-0 flex-wrap justify-end">
                     <DropdownMenu>
                         <template #button-content>
@@ -25,8 +25,8 @@
                 </div>
             </div>
 
-            <!-- Desktop view: Table -->
-            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-10 hidden md:block">
+            <!-- Desktop view: Table (changed z-index from 10 to 5) -->
+            <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-5 hidden md:block">
                 <table class="w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -73,7 +73,7 @@
             </div>
             
             <!-- Mobile view: Card list -->
-            <div class="md:hidden space-y-4 relative z-10">
+            <div class="md:hidden space-y-4 relative z-5">
                 <div v-if="transactions.length === 0" class="text-center py-4 text-sm text-gray-500">
                     Belum ada transaksi.
                 </div>
@@ -194,6 +194,13 @@ export default {
 
 <style scoped>
 /* Responsive adjustments */
+:deep(.absolute) {
+    z-index: 100 !important; /* Ensure dropdown is above all other elements */
+}
+
+/* Icon at the bottom of the card */
+i.fas.fa-history.text-gray-100 { z-index: 1; }
+
 @media (max-width: 768px) {
     .transaction-history .flex.items-center.justify-between {
         flex-direction: column;
@@ -205,5 +212,10 @@ export default {
         width: 100%;
         justify-content: flex-start;
     }
+}
+
+/* Force dropdown to appear above everything else in this component */
+.transaction-history :deep(.menuItems) {
+    position: relative !important;
 }
 </style>
