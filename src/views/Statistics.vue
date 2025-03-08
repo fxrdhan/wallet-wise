@@ -5,14 +5,36 @@
             <div class="flex items-center justify-between mb-6 relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800">Statistik Keuangan</h2>
                 <div class="flex space-x-2">
-                    <select v-model="timeRange" @change="updateChartData"
-                        class="bg-gray-100 border-0 text-gray-700 py-1 px-3 rounded-lg text-sm">
-                        <option value="thisMonth">Bulan Ini</option>
-                        <option value="threeMonths">3 Bulan Terakhir</option>
-                        <option value="sixMonths">6 Bulan Terakhir</option>
-                        <option value="thisYear">Tahun Ini</option>
-                        <option value="all">Semua Waktu</option>
-                    </select>
+                    <DropdownMenu>
+                        <template #button-content>
+                            <span>{{ getTimeRangeLabel }}</span>
+                        </template>
+                        <MenuItem v-slot="{ active }">
+                            <button @click="setTimeRange('thisMonth')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                                Bulan Ini
+                            </button>
+                        </MenuItem>
+                        <MenuItem v-slot="{ active }">
+                            <button @click="setTimeRange('threeMonths')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                                3 Bulan Terakhir
+                            </button>
+                        </MenuItem>
+                        <MenuItem v-slot="{ active }">
+                            <button @click="setTimeRange('sixMonths')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                                6 Bulan Terakhir
+                            </button>
+                        </MenuItem>
+                        <MenuItem v-slot="{ active }">
+                            <button @click="setTimeRange('thisYear')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                                Tahun Ini
+                            </button>
+                        </MenuItem>
+                        <MenuItem v-slot="{ active }">
+                            <button @click="setTimeRange('all')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                                Semua Waktu
+                            </button>
+                        </MenuItem>
+                    </DropdownMenu>
                 </div>
             </div>
 
@@ -154,8 +176,12 @@
 </template>
 
 <script>
+import { MenuItem } from '@headlessui/vue'
+import DropdownMenu from '../components/DropdownMenu.vue'
+
 export default {
     name: 'StatisticsView',
+    components: { MenuItem, DropdownMenu },
     data() {
         return {
             timeRange: 'thisMonth',
@@ -230,6 +256,16 @@ export default {
             }
 
             return max;
+        },
+        getTimeRangeLabel() {
+            const timeRangeLabels = {
+                'thisMonth': 'Bulan Ini',
+                'threeMonths': '3 Bulan Terakhir',
+                'sixMonths': '6 Bulan Terakhir',
+                'thisYear': 'Tahun Ini',
+                'all': 'Semua Waktu'
+            };
+            return timeRangeLabels[this.timeRange] || 'Bulan Ini';
         }
     },
     methods: {
@@ -318,6 +354,10 @@ export default {
                 return '0.6'; // Reduced opacity for non-active items
             }
             return '1'; // Full opacity for active/selected or when nothing is active
+        },
+        setTimeRange(range) {
+            this.timeRange = range;
+            this.updateChartData();
         }
     },
     mounted() {

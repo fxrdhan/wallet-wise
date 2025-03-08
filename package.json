@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "@headlessui/vue": "^1.7.23",
     "@tailwindcss/cli": "^4.0.11",
     "core-js": "^3.8.3",
     "date-fns": "^4.1.0",

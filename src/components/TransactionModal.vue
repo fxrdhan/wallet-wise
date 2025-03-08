@@ -58,17 +58,18 @@
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                                 <i class="fas fa-building"></i>
                             </span>
-                            <select id="platform" v-model="form.platform"
-                                class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 appearance-none">
-                                <option value="bank">Bank Transfer</option>
-                                <option value="ewallet">E-Wallet</option>
-                                <option value="tunai">Tunai</option>
-                                <option value="lainnya">Lainnya</option>
-                            </select>
-                            <span
-                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 pointer-events-none">
-                                <i class="fas fa-chevron-down"></i>
-                            </span>
+                            <div id="platform" @click="showPlatformDropdown = !showPlatformDropdown"
+                                class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer flex justify-between items-center">
+                                <span>{{ getPlatformLabel }}</span>
+                                <i class="fas fa-chevron-down text-gray-500"></i>
+                            </div>
+                            <div v-if="showPlatformDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                <div v-for="option in platformOptions" :key="option.value"
+                                    @click="selectPlatform(option.value)"
+                                    class="px-3 py-2 cursor-pointer hover:bg-gray-100">
+                                    {{ option.label }}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -115,20 +116,18 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                             <i class="fas fa-tag"></i>
                         </span>
-                        <select id="category" v-model="form.category"
-                            class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 appearance-none">
-                            <option value="makanan">Makanan</option>
-                            <option value="transportasi">Transportasi</option>
-                            <option value="belanja">Belanja</option>
-                            <option value="hiburan">Hiburan</option>
-                            <option value="utilitas">Utilitas</option>
-                            <option value="gaji">Gaji</option>
-                            <option value="lainnya">Lainnya</option>
-                        </select>
-                        <span
-                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 pointer-events-none">
-                            <i class="fas fa-chevron-down"></i>
-                        </span>
+                        <div id="category" @click="showCategoryDropdown = !showCategoryDropdown"
+                            class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer flex justify-between items-center">
+                            <span>{{ getCategoryLabel }}</span>
+                            <i class="fas fa-chevron-down text-gray-500"></i>
+                        </div>
+                        <div v-if="showCategoryDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                            <div v-for="option in categoryOptions" :key="option.value"
+                                @click="selectCategory(option.value)"
+                                class="px-3 py-2 cursor-pointer hover:bg-gray-100">
+                                {{ option.label }}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -158,6 +157,8 @@ export default {
     name: 'TransactionModal',
     data() {
         return {
+            showCategoryDropdown: false,
+            showPlatformDropdown: false,
             form: {
                 type: 'income',
                 description: '',
@@ -167,10 +168,39 @@ export default {
                 recipient: '',
                 platform: 'bank',
                 adminFee: 0
-            }
+            },
+            categoryOptions: [
+                { value: 'makanan', label: 'Makanan' },
+                { value: 'transportasi', label: 'Transportasi' },
+                { value: 'belanja', label: 'Belanja' },
+                { value: 'hiburan', label: 'Hiburan' },
+                { value: 'utilitas', label: 'Utilitas' },
+                { value: 'gaji', label: 'Gaji' },
+                { value: 'lainnya', label: 'Lainnya' }
+            ],
+            platformOptions: [
+                { value: 'bank', label: 'Bank Transfer' },
+                { value: 'ewallet', label: 'E-Wallet' },
+                { value: 'tunai', label: 'Tunai' },
+                { value: 'lainnya', label: 'Lainnya' }
+            ]
         }
     },
+    mounted() {
+        document.addEventListener('click', this.handleOutsideClick);
+    },
+    beforeUnmount() {
+        document.removeEventListener('click', this.handleOutsideClick);
+    },
     computed: {
+        getCategoryLabel() {
+            const category = this.categoryOptions.find(option => option.value === this.form.category);
+            return category ? category.label : 'Pilih Kategori';
+        },
+        getPlatformLabel() {
+            const platform = this.platformOptions.find(option => option.value === this.form.platform);
+            return platform ? platform.label : 'Pilih Platform';
+        },
         showModal() {
             return this.$store.state.showModal;
         },
@@ -258,6 +288,25 @@ export default {
             }
 
             return true;
+        },
+        handleOutsideClick(event) {
+            const categoryElement = document.getElementById('category');
+            if (categoryElement && !categoryElement.contains(event.target) && this.showCategoryDropdown) {
+                this.showCategoryDropdown = false;
+            }
+            
+            const platformElement = document.getElementById('platform');
+            if (platformElement && !platformElement.contains(event.target) && this.showPlatformDropdown) {
+                this.showPlatformDropdown = false;
+            }
+        },
+        selectCategory(value) {
+            this.form.category = value;
+            this.showCategoryDropdown = false;
+        },
+        selectPlatform(value) {
+            this.form.platform = value;
+            this.showPlatformDropdown = false;
         }
     }
 }

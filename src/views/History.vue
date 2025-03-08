@@ -5,14 +5,23 @@
             <div class="flex items-center justify-between mb-6 relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800">Riwayat Transaksi</h2>
                 <div class="flex space-x-2">
-                    <button
-                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-1 px-3 rounded-lg text-sm transition-colors">
-                        <i class="fas fa-filter mr-1"></i> Filter
-                    </button>
-                    <button
-                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-1 px-3 rounded-lg text-sm transition-colors">
-                        <i class="fas fa-download mr-1"></i> Ekspor
-                    </button>
+                    <DropdownMenu>
+                        <template #button-content>
+                            <i class="fas fa-filter mr-1"></i> Filter
+                        </template>
+                        <MenuItem v-slot="{ active }" v-for="option in filterOptions" :key="option.value">
+                            <button @click="filterByType(option.value)" 
+                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-2 text-left text-sm']">
+                                <i :class="option.icon" class="mr-2"></i> {{ option.label }}
+                            </button>
+                        </MenuItem>
+                    </DropdownMenu>
+                    <DropdownMenu>
+                        <template #button-content>
+                            <i class="fas fa-download mr-1"></i> Ekspor
+                        </template>
+                        <!-- Add export menu items here -->
+                    </DropdownMenu>
                 </div>
             </div>
 
@@ -68,8 +77,23 @@
 </template>
 
 <script>
+import { MenuItem } from '@headlessui/vue'
+import DropdownMenu from '../components/DropdownMenu.vue'
+
 export default {
     name: 'TransactionHistory',
+    components: { MenuItem, DropdownMenu },
+    data() {
+        return {
+            filterType: 'all',
+            filterOptions: [
+                { value: 'all', label: 'Semua Transaksi', icon: 'fas fa-list text-gray-500' },
+                { value: 'income', label: 'Pemasukan', icon: 'fas fa-arrow-down text-green-500' },
+                { value: 'expense', label: 'Pengeluaran', icon: 'fas fa-arrow-up text-red-500' },
+                { value: 'transfer', label: 'Transfer', icon: 'fas fa-exchange-alt text-blue-500' }
+            ]
+        }
+    },
     computed: {
         transactions() {
             return this.$store.getters.sortedTransactions;
