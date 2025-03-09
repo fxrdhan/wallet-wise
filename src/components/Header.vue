@@ -3,7 +3,7 @@
     <header class="mb-4 pt-4 transition-all overflow-hidden">
         <div class="p-4 flex flex-col md:flex-row justify-between items-center">
             <div>
-                <div class="flex items-center">
+                <div class="flex pl-4 items-center">
                     <i class="fas fa-wallet text-green-600 text-3xl mr-3"></i>
                     <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">Wallet Wise</h1>
                 </div>
