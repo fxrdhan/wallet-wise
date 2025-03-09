@@ -67,6 +67,13 @@ export default {
   opacity: 0.15;
   z-index: -1;
 }
+.asset-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* Navbar styles */
 .navbar-bottom {

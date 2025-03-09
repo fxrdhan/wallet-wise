@@ -7,7 +7,7 @@
             <div class="card-balance rounded-xl shadow-md p-5 card-hover transition-all">
                 <div class="flex flex-col card-content relative z-10">
                     <h2 class="text-lg font-semibold text-white opacity-90">Saldo Saat Ini</h2>
-                    <p class="text-3xl font-bold mt-4">Rp {{ formatNumber(balance) }}</p>
+                    <p class="text-3xl font-bold mt-4">Rp {{ formatNumber(totalBalance) }}</p>
                     <p class="text-sm text-white opacity-70 mt-2" v-if="isClient">Update terakhir: {{ lastUpdate }}</p>
                 </div>
                 <i class="fas fa-wallet card-icon"></i>
@@ -40,6 +40,36 @@
             </div>
         </section>
 
+        <!-- Asset Overview -->
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden mb-6">
+            <div class="flex items-center justify-between mb-6 relative z-10">
+                <h2 class="text-xl font-semibold text-gray-800">Ringkasan Aset</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div v-for="asset in assets" :key="asset.id" 
+                    class="p-4 border border-gray-100 rounded-lg"
+                    :class="{ 'bg-red-50': asset.type === 'loan', 'bg-blue-50': asset.type === 'bank', 'bg-purple-50': asset.type === 'savings', 'bg-green-50': asset.type === 'cash', 'bg-orange-50': asset.type === 'debit' }">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-medium">{{ asset.name }}</h3>
+                            <p class="text-xl font-bold" :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'debit' }">
+                                Rp {{ formatNumber(asset.balance) }}
+                            </p>
+                        </div>
+                        <div :class="{ 'bg-red-100': asset.type === 'loan', 'bg-blue-100': asset.type === 'bank', 'bg-purple-100': asset.type === 'savings', 'bg-green-100': asset.type === 'cash', 'bg-orange-100': asset.type === 'debit' }" 
+                            class="w-12 h-12 rounded-full flex items-center justify-center">
+                            <i :class="[
+                               getAssetIcon(asset.type),
+                               'text-xl',
+                               { 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'debit' }
+                            ]"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Recent Transactions -->
         <div v-if="recentTransactions.length > 0"
             class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
@@ -60,11 +90,21 @@
                         </div>
                         <div>
                             <h3 class="font-medium">{{ transaction.description }}</h3>
-                            <p class="text-sm text-gray-500">{{ formatDateSimple(transaction.date) }}</p>
+                            <p class="text-sm text-gray-500 mb-1">
+                                {{ formatDateSimple(transaction.date) }}  
+                            </p>
+                            <p class="text-xs text-gray-500 flex items-center">
+                                <span v-if="transaction.type !== 'transfer'">
+                                    <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' text-xs mr-1'"></i>{{ getAssetName(transaction.assetId) }}
+                                </span>
+                                <span v-else>
+                                    <i :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' text-xs mr-1'"></i>{{ getAssetName(transaction.sourceAssetId) }} → <i :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' text-xs mr-1'"></i>{{ getAssetName(transaction.targetAssetId) }}
+                                </span>
+                            </p>
                         </div>
                     </div>
-                    <div :class="getAmountClass(transaction.type)" class="text-lg font-bold">
-                        {{ getAmountPrefix(transaction.type) }} Rp {{ formatNumber(getTransactionTotal(transaction)) }}
+                    <div :class="getAmountClass(transaction.type)" class="text-lg font-bold whitespace-nowrap">
+                        {{ getAmountPrefix(transaction.type) }} {{ formatNumber(getTransactionTotal(transaction)) }}
                     </div>
                 </div>
             </div>
@@ -91,6 +131,9 @@ export default {
         }
     },
     computed: {
+        assets() {
+            return this.$store.state.assets;
+        },
         income() {
             return this.$store.getters.income;
         },
@@ -99,6 +142,9 @@ export default {
         },
         balance() {
             return this.$store.getters.balance;
+        },
+        totalBalance() {
+            return this.$store.getters.totalBalance;
         },
         lastUpdate() {
             return 'Hari Ini';
@@ -168,6 +214,24 @@ export default {
         },
         addTransaction() {
             this.$store.dispatch('showModal');
+        },
+        getAssetIcon(type) {
+            const icons = {
+                'cash': 'fas fa-money-bill-wave',
+                'bank': 'fas fa-university',
+                'debit': 'fas fa-credit-card',
+                'loan': 'fas fa-hand-holding-usd',
+                'savings': 'fas fa-piggy-bank'
+            };
+            return icons[type] || 'fas fa-wallet';
+        },
+        getAssetName(assetId) {
+            const asset = this.$store.state.assets.find(a => a.id === assetId);
+            return asset ? asset.name : 'Tidak Diketahui';
+        },
+        getAssetType(assetId) {
+            const asset = this.$store.state.assets.find(a => a.id === assetId);
+            return asset ? asset.type : 'cash';
         }
     }
 }

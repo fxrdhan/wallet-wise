@@ -104,6 +104,34 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Distribution by Asset -->
+                    <div class="card rounded-lg border border-gray-100 p-4 bg-white mt-4">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-4">Distribusi berdasarkan Aset</h4>
+                        <div class="space-y-3">
+                            <div v-for="asset in assets" :key="asset.id" class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div :class="{ 'bg-red-100': asset.type === 'loan', 'bg-blue-100': asset.type === 'bank', 'bg-purple-100': asset.type === 'savings', 'bg-green-100': asset.type === 'cash', 'bg-orange-100': asset.type === 'debit' }" 
+                                        class="w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                        <i :class="[
+                                            getAssetIcon(asset.type),
+                                            'text-sm',
+                                            { 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'debit' }
+                                        ]"></i>
+                                    </div>
+                                    <span>{{ asset.name }}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="mr-4">
+                                        <span :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'debit' }" class="font-medium">Rp {{ formatNumber(asset.balance) }}</span>
+                                    </div>
+                                    <div class="w-24 bg-gray-200 rounded-full h-2 overflow-hidden">
+                                        <div :class="{ 'bg-red-500': asset.type === 'loan', 'bg-blue-500': asset.type === 'bank', 'bg-purple-500': asset.type === 'savings', 'bg-green-500': asset.type === 'cash', 'bg-orange-500': asset.type === 'debit' }" class="h-full" :style="`width: ${getAssetPercentage(asset)}%`"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Row 2: Pie Chart -->
@@ -211,6 +239,9 @@ export default {
         }
     },
     computed: {
+        assets() {
+            return this.$store.state.assets;
+        },
         transactions() {
             return this.$store.state.transactions;
         },
@@ -380,6 +411,25 @@ export default {
                 return this.colorPalette[index % this.colorPalette.length];
             }
             return '#6B7280'; // Default color (gray-500)
+        },
+        getAssetIcon(type) {
+            const icons = {
+                'cash': 'fas fa-money-bill-wave',
+                'bank': 'fas fa-university',
+                'debit': 'fas fa-credit-card',
+                'loan': 'fas fa-hand-holding-usd',
+                'savings': 'fas fa-piggy-bank'
+            };
+            return icons[type] || 'fas fa-wallet';
+        },
+        getAssetPercentage(asset) {
+            const totalAssets = this.$store.state.assets.reduce((sum, a) => {
+                if (a.type !== 'loan') {
+                    return sum + a.balance;
+                }
+                return sum;
+            }, 0);
+            return totalAssets > 0 ? (asset.balance / totalAssets) * 100 : 0;
         },
         addTransaction() {
             this.$store.dispatch('showModal');

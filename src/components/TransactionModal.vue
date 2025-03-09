@@ -40,7 +40,74 @@
                     </div>
                 </div>
 
+                <!-- Pilih Aset untuk transaksi pemasukan dan pengeluaran -->
+                <div v-if="form.type !== 'transfer'">
+                    <label for="assetId" class="block text-gray-700 mb-1 text-sm font-medium">Aset</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                            <i class="fas fa-wallet"></i>
+                        </span>
+                        <div id="assetId" @click="showAssetDropdown = !showAssetDropdown"
+                            class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer flex justify-between items-center">
+                            <span>{{ getAssetLabel }}</span>
+                            <i class="fas fa-chevron-down text-gray-500"></i>
+                        </div>
+                        <div v-if="showAssetDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                            <div v-for="asset in assets" :key="asset.id"
+                                @click="selectAsset(asset.id)"
+                                class="px-3 py-2 cursor-pointer hover:bg-gray-100">
+                                {{ asset.name }} (Rp {{ formatNumber(asset.balance) }})
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div v-if="form.type === 'transfer'" class="space-y-4">
+                    <!-- Pilih Aset sumber (uang keluar) -->
+                    <div>
+                        <label for="sourceAssetId" class="block text-gray-700 mb-1 text-sm font-medium">Uang Keluar Dari</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fas fa-wallet"></i>
+                            </span>
+                            <div id="sourceAssetId" @click="showSourceAssetDropdown = !showSourceAssetDropdown"
+                                class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer flex justify-between items-center">
+                                <span>{{ getSourceAssetLabel }}</span>
+                                <i class="fas fa-chevron-down text-gray-500"></i>
+                            </div>
+                            <div v-if="showSourceAssetDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                <div v-for="asset in assets" :key="asset.id"
+                                    @click="selectSourceAsset(asset.id)"
+                                    class="px-3 py-2 cursor-pointer hover:bg-gray-100">
+                                    {{ asset.name }} (Rp {{ formatNumber(asset.balance) }})
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pilih Aset tujuan (uang masuk) -->
+                    <div>
+                        <label for="targetAssetId" class="block text-gray-700 mb-1 text-sm font-medium">Uang Masuk Ke</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <i class="fas fa-wallet"></i>
+                            </span>
+                            <div id="targetAssetId" @click="showTargetAssetDropdown = !showTargetAssetDropdown"
+                                class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer flex justify-between items-center">
+                                <span>{{ getTargetAssetLabel }}</span>
+                                <i class="fas fa-chevron-down text-gray-500"></i>
+                            </div>
+                            <div v-if="showTargetAssetDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                <div v-for="asset in assets" :key="asset.id"
+                                    @click="selectTargetAsset(asset.id)"
+                                    class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                    :class="{ 'opacity-50 cursor-not-allowed': asset.id === form.sourceAssetId }">
+                                    {{ asset.name }} (Rp {{ formatNumber(asset.balance) }})
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
                         <label for="recipient" class="block text-gray-700 mb-1 text-sm font-medium">Penerima</label>
                         <div class="relative">
@@ -159,6 +226,9 @@ export default {
         return {
             showCategoryDropdown: false,
             showPlatformDropdown: false,
+            showAssetDropdown: false,
+            showSourceAssetDropdown: false,
+            showTargetAssetDropdown: false,
             form: {
                 type: 'income',
                 description: '',
@@ -167,7 +237,10 @@ export default {
                 category: 'makanan',
                 recipient: '',
                 platform: 'bank',
-                adminFee: 0
+                adminFee: 0,
+                assetId: 'cash',
+                sourceAssetId: 'cash',
+                targetAssetId: 'bank',
             },
             categoryOptions: [
                 { value: 'makanan', label: 'Makanan' },
@@ -193,6 +266,9 @@ export default {
         document.removeEventListener('click', this.handleOutsideClick);
     },
     computed: {
+        assets() {
+            return this.$store.state.assets;
+        },
         getCategoryLabel() {
             const category = this.categoryOptions.find(option => option.value === this.form.category);
             return category ? category.label : 'Pilih Kategori';
@@ -200,6 +276,18 @@ export default {
         getPlatformLabel() {
             const platform = this.platformOptions.find(option => option.value === this.form.platform);
             return platform ? platform.label : 'Pilih Platform';
+        },
+        getAssetLabel() {
+            const asset = this.assets.find(asset => asset.id === this.form.assetId);
+            return asset ? asset.name : 'Pilih Aset';
+        },
+        getSourceAssetLabel() {
+            const asset = this.assets.find(asset => asset.id === this.form.sourceAssetId);
+            return asset ? asset.name : 'Pilih Aset Sumber';
+        },
+        getTargetAssetLabel() {
+            const asset = this.assets.find(asset => asset.id === this.form.targetAssetId);
+            return asset ? asset.name : 'Pilih Aset Tujuan';
         },
         showModal() {
             return this.$store.state.showModal;
@@ -220,6 +308,19 @@ export default {
             if (val && this.isEditing && this.editingTransaction) {
                 // Populate form with editing transaction data
                 this.form = { ...this.editingTransaction };
+                
+                // Set default values for assetId, sourceAssetId, targetAssetId if not present
+                if (!this.form.assetId && this.form.type !== 'transfer') {
+                    this.form.assetId = 'cash';
+                }
+                
+                if (!this.form.sourceAssetId && this.form.type === 'transfer') {
+                    this.form.sourceAssetId = 'cash';
+                }
+                
+                if (!this.form.targetAssetId && this.form.type === 'transfer') {
+                    this.form.targetAssetId = 'bank';
+                }
             } else if (val) {
                 // Reset form for new transaction
                 this.resetForm();
@@ -233,6 +334,9 @@ export default {
         }
     },
     methods: {
+        formatNumber(number) {
+            return number.toLocaleString('id-ID').replace(/,/g, ".");
+        },
         resetForm() {
             this.form = {
                 type: 'income',
@@ -242,7 +346,10 @@ export default {
                 category: 'makanan',
                 recipient: '',
                 platform: 'bank',
-                adminFee: 0
+                adminFee: 0,
+                assetId: 'cash',
+                sourceAssetId: 'cash',
+                targetAssetId: 'bank'
             };
         },
         closeModal() {
@@ -287,12 +394,32 @@ export default {
                 return false;
             }
 
+            if (this.form.type === 'transfer' && this.form.sourceAssetId === this.form.targetAssetId) {
+                alert('Aset sumber dan tujuan tidak boleh sama');
+                return false;
+            }
+
             return true;
         },
         handleOutsideClick(event) {
             const categoryElement = document.getElementById('category');
             if (categoryElement && !categoryElement.contains(event.target) && this.showCategoryDropdown) {
                 this.showCategoryDropdown = false;
+            }
+            
+            const assetElement = document.getElementById('assetId');
+            if (assetElement && !assetElement.contains(event.target) && this.showAssetDropdown) {
+                this.showAssetDropdown = false;
+            }
+            
+            const sourceAssetElement = document.getElementById('sourceAssetId');
+            if (sourceAssetElement && !sourceAssetElement.contains(event.target) && this.showSourceAssetDropdown) {
+                this.showSourceAssetDropdown = false;
+            }
+            
+            const targetAssetElement = document.getElementById('targetAssetId');
+            if (targetAssetElement && !targetAssetElement.contains(event.target) && this.showTargetAssetDropdown) {
+                this.showTargetAssetDropdown = false;
             }
             
             const platformElement = document.getElementById('platform');
@@ -307,6 +434,20 @@ export default {
         selectPlatform(value) {
             this.form.platform = value;
             this.showPlatformDropdown = false;
+        },
+        selectAsset(value) {
+            this.form.assetId = value;
+            this.showAssetDropdown = false;
+        },
+        selectSourceAsset(value) {
+            this.form.sourceAssetId = value;
+            this.showSourceAssetDropdown = false;
+        },
+        selectTargetAsset(value) {
+            if (value !== this.form.sourceAssetId) {
+                this.form.targetAssetId = value;
+                this.showTargetAssetDropdown = false;
+            }
         }
     }
 }

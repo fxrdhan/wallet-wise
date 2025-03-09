@@ -10,10 +10,10 @@
                             <i class="fas fa-filter relative z-20"></i>
                         </template>
                         <MenuItem v-slot="{ active }" v-for="option in filterOptions" :key="option.value">
-                            <button @click="filterByType(option.value)" 
-                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
-                                <i :class="option.icon" class="mr-2"></i> {{ option.label }}
-                            </button>
+                        <button @click="filterByType(option.value)"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
+                            <i :class="option.icon" class="mr-2"></i> {{ option.label }}
+                        </button>
                         </MenuItem>
                     </DropdownMenu>
                     <DropdownMenu class="icon-only-dropdown">
@@ -35,6 +35,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Deskripsi</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Aset</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Kategori</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Jumlah</th>
@@ -44,21 +46,35 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr v-if="transactions.length === 0">
-                            <td colspan="5">
+                            <td colspan="6">
                                 <div class="text-center py-8">
                                     <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
                                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Transaksi</h3>
-                                    <p class="text-gray-500 mb-4">Tambahkan transaksi pertama Anda dengan menekan tombol + di bawah</p>
-                                    <button @click="addTransaction" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+                                    <p class="text-gray-500 mb-4">Tambahkan transaksi pertama Anda dengan menekan tombol
+                                        + di bawah
+                                    </p>
+                                    <button @click="addTransaction"
+                                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
                                         <i class="fas fa-plus mr-2"></i> Tambah Transaksi
                                     </button>
                                 </div>
                             </td>
                         </tr>
                         <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDateSimple(transaction.date) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
+                                formatDateSimple(transaction.date) }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
                                 transaction.description }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span v-if="transaction.type !== 'transfer'">
+                                    <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i> {{ getAssetName(transaction.assetId) }}
+                                </span>
+                                <span v-else>
+                                    <i :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i> {{ getAssetName(transaction.sourceAssetId) }} → 
+                                    <i :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i> {{ getAssetName(transaction.targetAssetId) }}
+                                </span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
                                 getTransactionDetails(transaction) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm"
@@ -80,10 +96,11 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <!-- Mobile view: Card list -->
             <div class="md:hidden space-y-4 relative z-5">
-                <div v-if="transactions.length === 0" class="bg-white rounded-xl shadow-md p-6 card-hover transition-all text-center">
+                <div v-if="transactions.length === 0"
+                    class="bg-white rounded-xl shadow-md p-6 card-hover transition-all text-center">
                     <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Transaksi</h3>
                     <p class="text-gray-500 mb-4">Tambahkan transaksi pertama Anda dengan menekan tombol + di bawah</p>
@@ -93,26 +110,34 @@
                     </button>
                 </div>
                 <div v-for="transaction in transactions" :key="transaction.id" class="transaction-card-wrapper mb-6">
-                  <div class="bg-white rounded-t-lg border border-gray-200 shadow-sm p-4 relative overflow-hidden">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1 mr-4">
-                            <h3 class="font-medium text-gray-900">{{ transaction.description }}</h3>
-                            <p class="text-sm text-gray-500 capitalize">{{ getTransactionDetails(transaction) }}</p>
+                    <div class="bg-white rounded-t-lg border border-gray-200 shadow-sm p-4 relative overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1 mr-4">
+                                <h3 class="font-medium text-gray-900">{{ transaction.description }}</h3>
+                                <p class="text-sm text-gray-500 capitalize">{{ getTransactionDetails(transaction) }}</p>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    <span v-if="transaction.type !== 'transfer'">
+                                        <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i>{{ getAssetName(transaction.assetId) }}
+                                    </span>
+                                    <span v-else><i :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i>{{ getAssetName(transaction.sourceAssetId) }}
+                                         → <i :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i>{{ getAssetName(transaction.targetAssetId) }}</span>
+                                </p>
+                            </div>
+                            <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
+                                {{ getAmountPrefix(transaction.type) }} Rp {{
+                                    formatNumber(getTransactionTotal(transaction)) }}
+                            </div>
                         </div>
-                        <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
-                            {{ getAmountPrefix(transaction.type) }} Rp {{ formatNumber(getTransactionTotal(transaction)) }}
+                        <div class="flex justify-end">
+                            <p class="text-xs text-gray-400 mt-2">{{ formatDateSimple(transaction.date) }}</p>
                         </div>
                     </div>
-                    <div class="flex justify-end">
-                        <p class="text-xs text-gray-400 mt-2">{{ formatDateSimple(transaction.date) }}</p>
+                    <div class="action-sticks-container">
+                        <!-- Tombol Edit (Stick Oranye di Kiri) -->
+                        <div @click="editTransaction(transaction.id)" class="action-stick edit-stick"></div>
+                        <!-- Tombol Hapus (Stick Merah di Kanan) -->
+                        <div @click="deleteTransaction(transaction.id)" class="action-stick delete-stick"></div>
                     </div>
-                  </div>
-                  <div class="action-sticks-container">
-                    <!-- Tombol Edit (Stick Oranye di Kiri) -->
-                    <div @click="editTransaction(transaction.id)" class="action-stick edit-stick"></div>
-                    <!-- Tombol Hapus (Stick Merah di Kanan) -->
-                    <div @click="deleteTransaction(transaction.id)" class="action-stick delete-stick"></div>
-                  </div>
                 </div>
             </div>
 
@@ -131,6 +156,7 @@ export default {
     data() {
         return {
             filterType: 'all',
+            filterAssetId: null,
             filterOptions: [
                 { value: 'all', label: 'Semua', icon: 'fas fa-list text-gray-500' },
                 { value: 'income', label: 'Pemasukan', icon: 'fas fa-arrow-down text-green-500' },
@@ -151,6 +177,12 @@ export default {
         transactions() {
             if (this.filterType !== 'all') {
                 return this.$store.getters.sortedTransactions.filter(t => t.type === this.filterType);
+            }
+
+            // Jika ada filter aset, terapkan
+            if (this.filterAssetId) {
+                return this.$store.getters.sortedTransactions.filter(t =>
+                    t.assetId === this.filterAssetId || t.sourceAssetId === this.filterAssetId || t.targetAssetId === this.filterAssetId);
             }
             return this.$store.getters.sortedTransactions;
         }
@@ -205,6 +237,24 @@ export default {
             if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
                 this.$store.dispatch('deleteTransaction', id);
             }
+        },
+        getAssetName(assetId) {
+            const asset = this.$store.state.assets.find(a => a.id === assetId);
+            return asset ? asset.name : 'Tidak Diketahui';
+        },
+        getAssetIcon(type) {
+            const icons = {
+                'cash': 'fas fa-money-bill-wave',
+                'bank': 'fas fa-university',
+                'debit': 'fas fa-credit-card',
+                'loan': 'fas fa-hand-holding-usd',
+                'savings': 'fas fa-piggy-bank'
+            };
+            return icons[type] || 'fas fa-wallet';
+        },
+        getAssetType(assetId) {
+            const asset = this.$store.state.assets.find(a => a.id === assetId);
+            return asset ? asset.type : 'cash';
         }
     }
 }
@@ -213,14 +263,17 @@ export default {
 <style scoped>
 /* Responsive adjustments */
 .transaction-history {
-    padding-bottom: 40px; 
+    padding-bottom: 40px;
 }
+
 :deep(.absolute) {
-    z-index: 1000 !important; 
+    z-index: 1000 !important;
 }
 
 /* Icon at the bottom of the card */
-i.fas.fa-history.text-gray-100 { z-index: 1; }
+i.fas.fa-history.text-gray-100 {
+    z-index: 1;
+}
 
 .flex.space-x-2 {
     position: relative;
@@ -230,7 +283,7 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     .transaction-history .flex.items-center.justify-between {
         align-items: center;
     }
-    
+
     .transaction-history .flex.items-center.justify-between .flex.space-x-2 {
         margin-top: 0.75rem;
         width: 100%;
@@ -261,8 +314,10 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     align-items: center;
     justify-content: center;
 }
+
 .icon-only-dropdown :deep(button:hover) {
-    color: #374151; /* gray-700 */
+    color: #374151;
+    /* gray-700 */
 }
 
 .icon-only-dropdown :deep(.menuItems) {
@@ -309,29 +364,33 @@ i.fas.fa-history.text-gray-100 { z-index: 1; }
     border-radius: 0 0 20px 20px;
     pointer-events: auto !important;
     opacity: 0.8;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .action-stick:hover {
     transform: scaleX(1.1);
     opacity: 1;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .edit-stick {
-    background-color: #F97316; /* orange-500 */
+    background-color: #F97316;
+    /* orange-500 */
 }
 
 .edit-stick:hover {
-    background-color: #EA580C; /* orange-600 */
+    background-color: #EA580C;
+    /* orange-600 */
 }
 
 .delete-stick {
-    background-color: #EF4444; /* red-500 */
+    background-color: #EF4444;
+    /* red-500 */
 }
 
 .delete-stick:hover {
-    background-color: #DC2626; /* red-600 */
+    background-color: #DC2626;
+    /* red-600 */
 }
 
 .action-buttons button {
@@ -344,5 +403,4 @@ i.fas.fa-history.text-gray-100 {
     z-index: 1 !important;
     pointer-events: none !important;
 }
-
 </style>
