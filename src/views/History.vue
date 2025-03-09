@@ -44,7 +44,16 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr v-if="transactions.length === 0">
-                            <td class="px-6 py-4 text-sm text-gray-500" colspan="5">Belum ada transaksi.</td>
+                            <td colspan="5">
+                                <div class="text-center py-8">
+                                    <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Transaksi</h3>
+                                    <p class="text-gray-500 mb-4">Tambahkan transaksi pertama Anda dengan menekan tombol + di bawah</p>
+                                    <button @click="addTransaction" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+                                        <i class="fas fa-plus mr-2"></i> Tambah Transaksi
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                         <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDateSimple(transaction.date) }}</td>
@@ -74,8 +83,14 @@
             
             <!-- Mobile view: Card list -->
             <div class="md:hidden space-y-4 relative z-5">
-                <div v-if="transactions.length === 0" class="text-center py-4 text-sm text-gray-500">
-                    Belum ada transaksi.
+                <div v-if="transactions.length === 0" class="bg-white rounded-xl shadow-md p-6 card-hover transition-all text-center">
+                    <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Transaksi</h3>
+                    <p class="text-gray-500 mb-4">Tambahkan transaksi pertama Anda dengan menekan tombol + di bawah</p>
+                    <button @click="addTransaction"
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Tambah Transaksi
+                    </button>
                 </div>
                 <div v-for="transaction in transactions" :key="transaction.id" class="transaction-card-wrapper mb-6">
                   <div class="bg-white rounded-t-lg border border-gray-200 shadow-sm p-4 relative overflow-hidden">
@@ -179,6 +194,9 @@ export default {
         capitalizeFirstLetter(string) {
             if (!string) return '';
             return string.charAt(0).toUpperCase() + string.slice(1);
+        },
+        addTransaction() {
+            this.$store.dispatch('showModal');
         },
         editTransaction(id) {
             this.$store.dispatch('showModal', id);
