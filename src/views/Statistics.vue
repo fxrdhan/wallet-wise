@@ -124,7 +124,7 @@
                                     </div>
                                     <div class="flex items-center">
                                         <div class="mr-4">
-                                            <span :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }" class="font-medium">Rp {{ formatNumber(asset.balance) }}</span>
+                                            <span :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }" class="font-medium">{{ formatPercentage(getAssetPercentage(asset)) }}%</span>
                                         </div>
                                         <div class="w-24 bg-gray-200 rounded-full h-2 overflow-hidden">
                                             <div :class="{ 'bg-red-500': asset.type === 'loan', 'bg-blue-500': asset.type === 'bank', 'bg-purple-500': asset.type === 'savings', 'bg-green-500': asset.type === 'cash', 'bg-orange-500': asset.type === 'credit' }" class="h-full" :style="`width: ${getAssetPercentage(asset)}%`"></div>
