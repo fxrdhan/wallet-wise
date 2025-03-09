@@ -7,9 +7,9 @@ export default createStore({
         assets: JSON.parse(localStorage.getItem('assets')) || [
             { id: 'cash', name: 'Tunai', balance: 0, type: 'cash' },
             { id: 'bank', name: 'Bank', balance: 0, type: 'bank' },
-            { id: 'debit', name: 'Debit', balance: 0, type: 'debit' },
-            { id: 'loan', name: 'Pinjaman', balance: 0, type: 'loan' },
-            { id: 'savings', name: 'Tabungan', balance: 0, type: 'savings' }
+            { id: 'savings', name: 'Tabungan', balance: 0, type: 'savings' },
+            { id: 'credit', name: 'Kredit', balance: 0, type: 'credit' },
+            { id: 'loan', name: 'Pinjaman', balance: 0, type: 'loan' }
         ],
         showModal: false,
         editingTransactionId: null

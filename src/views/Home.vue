@@ -47,26 +47,28 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div v-for="asset in assets" :key="asset.id" 
-                    class="p-4 border border-gray-100 rounded-lg"
-                    :class="{ 'bg-red-50': asset.type === 'loan', 'bg-blue-50': asset.type === 'bank', 'bg-purple-50': asset.type === 'savings', 'bg-green-50': asset.type === 'cash', 'bg-orange-50': asset.type === 'debit' }">
+                <!-- Sort assets to ensure correct display order -->
+                <template v-for="asset in sortedAssets" :key="asset.id">
+                <div class="p-4 border border-gray-100 rounded-lg"
+                    :class="{ 'bg-red-50': asset.type === 'loan', 'bg-blue-50': asset.type === 'bank', 'bg-purple-50': asset.type === 'savings', 'bg-green-50': asset.type === 'cash', 'bg-orange-50': asset.type === 'credit' }">
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="font-medium">{{ asset.name }}</h3>
-                            <p class="text-xl font-bold" :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'debit' }">
+                            <p class="text-xl font-bold" :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }">
                                 Rp {{ formatNumber(asset.balance) }}
                             </p>
                         </div>
-                        <div :class="{ 'bg-red-100': asset.type === 'loan', 'bg-blue-100': asset.type === 'bank', 'bg-purple-100': asset.type === 'savings', 'bg-green-100': asset.type === 'cash', 'bg-orange-100': asset.type === 'debit' }" 
+                        <div :class="{ 'bg-red-100': asset.type === 'loan', 'bg-blue-100': asset.type === 'bank', 'bg-purple-100': asset.type === 'savings', 'bg-green-100': asset.type === 'cash', 'bg-orange-100': asset.type === 'credit' }" 
                             class="w-12 h-12 rounded-full flex items-center justify-center">
                             <i :class="[
                                getAssetIcon(asset.type),
                                'text-xl',
-                               { 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'debit' }
+                               { 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }
                             ]"></i>
                         </div>
                     </div>
                 </div>
+                </template>
             </div>
         </div>
 
@@ -133,6 +135,24 @@ export default {
     computed: {
         assets() {
             return this.$store.state.assets;
+        },
+        sortedAssets() {
+            // Define order of asset types
+            const typeOrder = {
+                'cash': 1,
+                'bank': 2,
+                'savings': 3,
+                'credit': 4,
+                'loan': 5
+            };
+            
+            // Return sorted array of assets
+            return [...this.assets].sort((a, b) => {
+                const orderA = typeOrder[a.type] || 99;
+                const orderB = typeOrder[b.type] || 99;
+                
+                return orderA - orderB;
+            });
         },
         income() {
             return this.$store.getters.income;
@@ -219,7 +239,7 @@ export default {
             const icons = {
                 'cash': 'fas fa-money-bill-wave',
                 'bank': 'fas fa-university',
-                'debit': 'fas fa-credit-card',
+                'credit': 'fas fa-credit-card',
                 'loan': 'fas fa-hand-holding-usd',
                 'savings': 'fas fa-piggy-bank'
             };

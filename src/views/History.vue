@@ -246,7 +246,7 @@ export default {
             const icons = {
                 'cash': 'fas fa-money-bill-wave',
                 'bank': 'fas fa-university',
-                'debit': 'fas fa-credit-card',
+                'credit': 'fas fa-credit-card',
                 'loan': 'fas fa-hand-holding-usd',
                 'savings': 'fas fa-piggy-bank'
             };
