@@ -22,10 +22,11 @@ export default createStore({
         },
         expense: state => {
             return state.transactions
-                .filter(transaction => transaction.type === 'expense' || transaction.type === 'transfer')
-                .reduce((total, transaction) => {
-                    return total + transaction.amount + (transaction.type === 'transfer' ? (transaction.adminFee || 0) : 0);
-                }, 0);
+                .filter(transaction => transaction.type === 'expense')
+                .reduce((total, transaction) => total + transaction.amount, 0) +
+                state.transactions
+                .filter(transaction => transaction.type === 'transfer')
+                .reduce((total, transaction) => total + (transaction.adminFee || 0), 0);
         },
         balance: (state, getters) => {
             return getters.income - getters.expense;
