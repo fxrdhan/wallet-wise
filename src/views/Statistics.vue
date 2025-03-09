@@ -158,6 +158,21 @@
                                 </svg>
                             </div>
                         </div>
+                        
+                        <!-- New Section: Total Amount for Hovered Category -->
+                        <div 
+                            v-if="activeSlice" 
+                            class="mt-4 bg-gray-50 rounded-lg border border-gray-200 p-4 transition-all duration-300 transform"
+                            style="transform-origin: top center;">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="text-sm text-gray-600 pb-1">Total Pengeluaran untuk <span class="font-medium capitalize">{{ activeSlice.category }}</span></h4>
+                                    <p class="text-xl font-bold" :style="`color: ${getColorForCategory(activeSlice.category)}`">
+                                        Rp {{ formatNumber(activeSlice.amount) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -358,6 +373,14 @@ export default {
         setTimeRange(range) {
             this.timeRange = range;
             this.updateChartData();
+        },
+        getColorForCategory(category) {
+            // Find the index of the category in the current pie data
+            const index = this.expensePieData.findIndex(slice => slice.category === category);
+            if (index >= 0) {
+                return this.colorPalette[index % this.colorPalette.length];
+            }
+            return '#6B7280'; // Default color (gray-500)
         }
     },
     mounted() {

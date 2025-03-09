@@ -127,7 +127,7 @@ export default {
     computed: {
         filterTitle() {
             if (this.filterType === 'all') {
-                return 'Riwayat';
+                return 'Semua Riwayat';
             } else {
                 const option = this.filterOptions.find(opt => opt.value === this.filterType);
                 return option ? option.label : 'Riwayat Transaksi';
