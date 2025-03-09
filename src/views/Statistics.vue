@@ -166,7 +166,7 @@
                             style="transform-origin: top center;">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <h4 class="text-sm text-gray-600 pb-1">Total Pengeluaran untuk <span class="font-medium capitalize">{{ activeSlice.category }}</span></h4>
+                                    <h4 class="text-sm text-gray-600 pb-1"><span class="font-medium capitalize">{{ activeSlice.category }}</span></h4>
                                     <p class="text-xl font-bold" :style="`color: ${getColorForCategory(activeSlice.category)}`">
                                         Rp {{ formatNumber(activeSlice.amount) }}
                                     </p>

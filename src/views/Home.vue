@@ -64,7 +64,7 @@
                         </div>
                     </div>
                     <div :class="getAmountClass(transaction.type)" class="text-lg font-bold">
-                        {{ getAmountPrefix(transaction.type) }} Rp {{ formatNumber(transaction.amount) }}
+                        {{ getAmountPrefix(transaction.type) }} Rp {{ formatNumber(getTransactionTotal(transaction)) }}
                     </div>
                 </div>
             </div>
@@ -162,6 +162,9 @@ export default {
         },
         getAmountPrefix(type) {
             return type === 'income' ? '+' : '-';
+        },
+        getTransactionTotal(transaction) {
+            return transaction.amount + (transaction.type === 'transfer' ? (transaction.adminFee || 0) : 0);
         },
         addTransaction() {
             this.$store.dispatch('showModal');
