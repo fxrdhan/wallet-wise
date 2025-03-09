@@ -31,7 +31,7 @@ export default createStore({
     },
     mutations: {
         ADD_TRANSACTION(state, transaction) {
-            state.transactions.push({
+            state.transactions.unshift({
                 id: Date.now(),
                 ...transaction
             });

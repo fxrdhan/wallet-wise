@@ -313,7 +313,6 @@ export default {
                     return { category, amount, percentage };
                 })
                 .sort((a, b) => b.amount - a.amount)
-                .slice(0, 5); // Limit to top 5 categories
         },
         getSliceFill(slice, index) {
             const baseColor = this.colorPalette[index % this.colorPalette.length];
