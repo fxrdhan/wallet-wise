@@ -140,7 +140,18 @@
                 <div class="mt-6">
                     <div class="card rounded-lg border border-gray-100 p-4">
                         <h3 class="text-lg font-semibold text-gray-700 mb-4 ml-1">Distribusi Pengeluaran</h3>
-                        <div class="mt-4 overflow-y-hidden pb-2">
+                        
+                        <!-- Placeholder ketika tidak ada data pengeluaran -->
+                        <div v-if="expensePieData.length === 0" class="text-center py-8">
+                            <i class="fas fa-chart-pie text-gray-300 text-5xl mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Pengeluaran</h3>
+                            <p class="text-gray-500 mb-4">Tambahkan transaksi pengeluaran untuk melihat distribusinya</p>
+                            <button @click="addTransaction"
+                                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Tambah Pengeluaran
+                            </button>
+                        </div>
+                        <div v-else class="mt-4 overflow-y-hidden pb-2">
                             <!-- New Legend Design -->
                             <div class="flex flex-wrap gap-2 mb-4 ml-1 mt-1">
                                 <div v-for="(slice, index) in expensePieData" :key="index"
@@ -163,7 +174,7 @@
                         </div>
 
                         <!-- Pie Chart Container -->
-                        <div class="aspect-square relative h-64 mx-auto">
+                        <div v-if="expensePieData.length > 0" class="aspect-square relative h-64 mx-auto">
                             <div class="h-full flex items-center justify-center">
                                 <svg class="w-full h-full" viewBox="0 0 400 400">
                                     <g transform="translate(200, 200)">
@@ -191,7 +202,7 @@
                         
                         <!-- New Section: Total Amount for Hovered Category -->
                         <div 
-                            v-if="activeSlice" 
+                            v-if="activeSlice && expensePieData.length > 0" 
                             class="mt-4 bg-gray-50 rounded-lg border border-gray-200 p-4 transition-all duration-300 transform"
                             style="transform-origin: top center;">
                             <div class="flex justify-between items-center">
