@@ -1,7 +1,7 @@
 <!-- src/views/History.vue -->
 <template>
     <div class="transaction-history">
-        <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">            
             <div class="flex items-center justify-between mb-6 relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800 flex-shrink-0">{{ filterTitle }}</h2>
                 <div class="flex space-x-3 mt-2 sm:mt-0 justify-end relative z-20">
@@ -144,6 +144,43 @@
             <i class="fas fa-history text-gray-100 opacity-5 absolute -bottom-10 -right-10 text-9xl"></i>
         </div>
     </div>
+    
+    <!-- Confirmation Dialog - pindahkan ke luar komponen utama -->
+    <div id="deleteConfirmationModal" class="modal" :style="{ display: showDeleteConfirmation ? 'block' : 'none' }" @click.self="cancelDelete">
+        <div class="modal-content p-6">
+            <button @click="cancelDelete" class="close-modal text-gray-500 hover:text-gray-800">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-4">
+                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-trash-alt text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800">Konfirmasi Penghapusan</h3>
+                <p class="text-gray-600 mt-2">Apakah Anda yakin ingin menghapus transaksi ini?</p>
+                <div v-if="transactionToDelete" class="bg-gray-50 p-3 rounded-lg mt-3 text-left">
+                    <p class="font-medium flex justify-between items-center">
+                        <span>{{ transactionToDelete.description }}</span>
+                        <span :class="getAmountColorClass(transactionToDelete.type)">
+                            {{ getAmountPrefix(transactionToDelete.type) }} Rp {{ formatNumber(getTransactionTotal(transactionToDelete)) }}</span>
+                    </p>
+                    <p class="text-sm text-gray-500">{{ formatDateSimple(transactionToDelete.date) }}</p>
+                </div>
+            </div>
+            <div class="flex space-x-3 justify-center">
+                <button 
+                    @click="cancelDelete" 
+                    class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-gray-800 font-medium">
+                    Batal
+                </button>
+                <button 
+                    @click="confirmDelete" 
+                    class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-medium flex items-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -156,6 +193,9 @@ export default {
     data() {
         return {
             filterType: 'all',
+            showDeleteConfirmation: false,
+            deleteTransactionId: null,
+            transactionToDelete: null,
             filterAssetId: null,
             filterOptions: [
                 { value: 'all', label: 'Semua', icon: 'fas fa-list text-gray-500' },
@@ -185,6 +225,15 @@ export default {
                     t.assetId === this.filterAssetId || t.sourceAssetId === this.filterAssetId || t.targetAssetId === this.filterAssetId);
             }
             return this.$store.getters.sortedTransactions;
+        }
+    },
+    watch: {
+        showDeleteConfirmation(val) {
+            if (val) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
         }
     },
     methods: {
@@ -234,9 +283,22 @@ export default {
             this.$store.dispatch('showModal', id);
         },
         deleteTransaction(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                this.$store.dispatch('deleteTransaction', id);
+            // Mencari data transaksi yang akan dihapus untuk ditampilkan dalam dialog
+            const transaction = this.$store.getters.sortedTransactions.find(t => t.id === id);
+            this.deleteTransactionId = id;
+            this.transactionToDelete = transaction;
+            this.showDeleteConfirmation = true;
+        },
+        confirmDelete() {
+            if (this.deleteTransactionId) {
+                this.$store.dispatch('deleteTransaction', this.deleteTransactionId);
+                this.cancelDelete();
             }
+        },
+        cancelDelete() {
+            this.showDeleteConfirmation = false;
+            this.deleteTransactionId = null;
+            this.transactionToDelete = null;
         },
         getAssetName(assetId) {
             const asset = this.$store.state.assets.find(a => a.id === assetId);
