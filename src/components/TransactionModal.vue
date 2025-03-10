@@ -130,6 +130,17 @@
                                 class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
                         </div>
                     </div>
+                    
+                    <!-- Checkbox untuk transfer antar bank -->
+                    <div v-if="isInterBankTransfer">
+                        <div class="flex items-center mt-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                            <input type="checkbox" id="recordAsExpense" v-model="form.recordAsExpense"
+                                class="h-4 w-4 text-green-600 focus:ring-green-500 rounded">
+                            <label for="recordAsExpense" class="ml-2 block text-gray-700 text-sm">
+                                Catat sebagai pengeluaran
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -216,6 +227,7 @@ export default {
                 recipient: '',
                 adminFee: 0,
                 assetId: 'cash',
+                recordAsExpense: false,
                 sourceAssetId: 'cash',
                 targetAssetId: 'bank',
             },
@@ -262,6 +274,12 @@ export default {
         isEditing() {
             return this.$store.state.editingTransactionId !== null;
         },
+        isInterBankTransfer() {
+            // Periksa apakah kedua asset bertipe 'bank'
+            const sourceAsset = this.assets.find(asset => asset.id === this.form.sourceAssetId);
+            const targetAsset = this.assets.find(asset => asset.id === this.form.targetAssetId);
+            return sourceAsset?.type === 'bank' && targetAsset?.type === 'bank';
+        },
         editingTransaction() {
             if (!this.isEditing) return null;
 
@@ -298,6 +316,14 @@ export default {
             } else {
                 document.body.style.overflow = '';
             }
+        },
+        'form.sourceAssetId': function() {
+            // Reset recordAsExpense ketika asset sumber berubah
+            this.form.recordAsExpense = false;
+        },
+        'form.targetAssetId': function() {
+            // Reset recordAsExpense ketika asset tujuan berubah
+            this.form.recordAsExpense = false;
         }
     },
     methods: {
@@ -313,6 +339,7 @@ export default {
                 category: 'makanan',
                 recipient: '',
                 adminFee: 0,
+                recordAsExpense: false,
                 assetId: 'cash',
                 sourceAssetId: 'cash',
                 targetAssetId: 'bank'
@@ -329,7 +356,8 @@ export default {
             const transaction = {
                 ...this.form,
                 amount: Number(this.form.amount),
-                adminFee: Number(this.form.adminFee || 0)
+                adminFee: Number(this.form.adminFee || 0),
+                recordAsExpense: this.form.recordAsExpense
             };
 
             if (this.isEditing) {
@@ -361,6 +389,15 @@ export default {
             }
 
             if (this.form.type === 'transfer' && this.form.sourceAssetId === this.form.targetAssetId) {
+                // Cek apakah kedua aset adalah bank
+                const sourceAsset = this.assets.find(asset => asset.id === this.form.sourceAssetId);
+                const targetAsset = this.assets.find(asset => asset.id === this.form.targetAssetId);
+                
+                // Jika keduanya adalah bank, izinkan transfer (untuk kasus transfer antar rekening di bank yang sama)
+                if (sourceAsset?.type === 'bank' && targetAsset?.type === 'bank') {
+                    return true;
+                }
+                
                 alert('Aset sumber dan tujuan tidak boleh sama');
                 return false;
             }
