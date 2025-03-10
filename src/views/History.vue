@@ -23,13 +23,13 @@
                         <MenuItem v-slot="{ active }">
                             <button @click="exportToCSV()" 
                                 :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
-                                <i class="fas fa-file-csv mr-2 text-green-600"></i> Export CSV
+                                <i class="fas fa-file-csv mr-2 text-green-600"></i> Export ke CSV
                             </button>
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
-                            <button @click="showGoogleSheetsModal()" 
+                            <button @click="exportToPDF()" 
                                 :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
-                                <i class="fas fa-file-excel mr-2 text-green-600"></i> Export Spreadsheet
+                                <i class="fas fa-file-pdf mr-2 text-red-600"></i> Export ke PDF
                             </button>
                         </MenuItem>
                     </DropdownMenu>
@@ -201,64 +201,8 @@
         </div>
     </div>
     
-    <!-- Google Sheets Export Modal -->
-    <div id="sheetsExportModal" class="modal" :style="{ display: showSheetsModal ? 'block' : 'none' }" @click.self="closeSheetsModal">
-        <div class="modal-content p-6 max-w-md">
-            <button @click="closeSheetsModal" class="close-modal text-gray-500 hover:text-gray-800">
-                <i class="fas fa-times"></i>
-            </button>
-            
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-file-excel text-green-600 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-800">Export ke Spreadsheet</h3>
-                <p class="text-gray-600 mt-2">Masukkan link Google Sheets Anda untuk mengekspor data transaksi.</p>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label for="sheetsUrl" class="block text-gray-700 mb-1 text-sm font-medium">Link Google Sheets</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                            <i class="fas fa-link"></i>
-                        </span>
-                        <input type="text" id="sheetsUrl" v-model="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/..."
-                            class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">
-                        Pastikan spreadsheet dapat diakses untuk menulis data (hak akses Edit).
-                    </p>
-                </div>
-                
-                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <h4 class="font-medium text-blue-800 mb-1">Langkah untuk membuat Google Sheets:</h4>
-                    <ol class="text-sm text-blue-700 pl-5 list-decimal">
-                        <li>Buka <a href="https://docs.google.com/spreadsheets" target="_blank" class="underline">Google Sheets</a></li>
-                        <li>Buat spreadsheet baru</li>
-                        <li>Klik tombol Share di kanan atas</li>
-                        <li>Ubah akses menjadi "Anyone with the link can edit"</li>
-                        <li>Salin link dan tempel di sini</li>
-                    </ol>
-                </div>
-                
-                <div class="pt-2">
-                    <button 
-                        @click="exportToGoogleSheets" 
-                        :disabled="!isValidSheetsUrl"
-                        :class="[
-                            'w-full py-2 px-4 rounded-lg font-medium flex items-center justify-center',
-                            isValidSheetsUrl 
-                                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        ]">
-                        <i class="fas fa-file-export mr-2"></i>
-                        Export Data
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- PDF Export invisible container -->
+    <div ref="pdfContent" class="pdf-export-container"></div>
 </template>
 
 <script>
@@ -274,8 +218,6 @@ export default {
             showDeleteConfirmation: false,
             deleteTransactionId: null,
             transactionToDelete: null,
-            showSheetsModal: false,
-            sheetsUrl: '',
             filterAssetId: null,
             filterOptions: [
                 { value: 'all', label: 'Semua', icon: 'fas fa-list text-gray-500' },
@@ -307,10 +249,6 @@ export default {
             
             return this.$store.getters.sortedTransactions;
         },
-        isValidSheetsUrl() {
-            return this.sheetsUrl.trim() !== '' && 
-                  (this.sheetsUrl.includes('docs.google.com/spreadsheets') || this.sheetsUrl.includes('sheets.google.com'));
-        }
     },
     watch: {
         showDeleteConfirmation(val) {
@@ -473,30 +411,185 @@ export default {
                 alert('Terjadi kesalahan saat mengekspor data. Silakan coba lagi.');
             }
         },
-        showGoogleSheetsModal() {
-            this.showSheetsModal = true;
-            document.body.style.overflow = 'hidden';
-        },
-        closeSheetsModal() {
-            this.showSheetsModal = false;
-            document.body.style.overflow = '';
-        },
-        exportToGoogleSheets() {
-            if (!this.isValidSheetsUrl) {
-                alert('Mohon masukkan URL Google Sheets yang valid.');
-                return;
+        exportToPDF() {
+            try {
+                // Mendapatkan transaksi berdasarkan filter saat ini
+                const transactionsToExport = this.transactions;
+                
+                if (transactionsToExport.length === 0) {
+                    alert('Tidak ada data transaksi untuk diekspor.');
+                    return;
+                }
+
+                // Membuat tampilan untuk PDF dengan data transaksi
+                const pdfContainer = this.$refs.pdfContent;
+                pdfContainer.innerHTML = '';
+
+                // Membuat elemen style untuk styling PDF
+                const style = document.createElement('style');
+                style.textContent = `
+                    .pdf-page {
+                        font-family: Arial, sans-serif;
+                        color: #333;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .pdf-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .pdf-title {
+                        font-size: 24px;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }
+                    .pdf-subtitle {
+                        font-size: 14px;
+                        color: #666;
+                    }
+                    .pdf-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 20px;
+                    }
+                    .pdf-table th, .pdf-table td {
+                        border: 1px solid #ddd;
+                        padding: 8px;
+                        text-align: left;
+                    }
+                    .pdf-table th {
+                        background-color: #f2f2f2;
+                        font-weight: bold;
+                    }
+                    .pdf-table tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                    .pdf-footer {
+                        margin-top: 30px;
+                        text-align: center;
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    .text-green { color: #22c55e; }
+                    .text-red { color: #ef4444; }
+                    .text-purple { color: #9333ea; }
+                    
+                    @media print {
+                        body * {
+                            visibility: hidden;
+                        }
+                        .pdf-export-container, .pdf-export-container * {
+                            visibility: visible;
+                        }
+                        .pdf-export-container {
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            width: 100%;
+                        }
+                        .pdf-page {
+                            width: 100%;
+                            max-width: none;
+                        }
+                    }
+                `;
+                
+                // Membuat konten PDF
+                const pdfPage = document.createElement('div');
+                pdfPage.className = 'pdf-page';
+                
+                // Header
+                const header = document.createElement('div');
+                header.className = 'pdf-header';
+                
+                const title = document.createElement('div');
+                title.className = 'pdf-title';
+                title.textContent = 'Laporan Transaksi Wallet Wise';
+                
+                const subtitle = document.createElement('div');
+                subtitle.className = 'pdf-subtitle';
+                subtitle.textContent = `Diekspor pada: ${new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+                
+                header.appendChild(title);
+                header.appendChild(subtitle);
+                
+                // Tabel transaksi
+                const table = document.createElement('table');
+                table.className = 'pdf-table';
+                
+                // Header tabel
+                const thead = document.createElement('thead');
+                thead.innerHTML = `<tr>
+                    <th>Tanggal</th>
+                    <th>Deskripsi</th>
+                    <th>Tipe</th>
+                    <th>Kategori/Detail</th>
+                    <th>Aset</th>
+                    <th>Jumlah</th>
+                </tr>`;
+                
+                // Isi tabel
+                const tbody = document.createElement('tbody');
+                
+                transactionsToExport.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    
+                    // Tentukan class warna berdasarkan tipe transaksi
+                    const amountClass = transaction.type === 'income' ? 'text-green' : 
+                                        transaction.type === 'expense' ? 'text-red' : 'text-purple';
+                    
+                    const amountPrefix = transaction.type === 'income' ? '+' : '-';
+                    
+                    row.innerHTML = `
+                        <td>${this.formatDateSimple(transaction.date)}</td>
+                        <td>${transaction.description}</td>
+                        <td>${transaction.type === 'income' ? 'Pemasukan' : 
+                              transaction.type === 'expense' ? 'Pengeluaran' : 'Transfer'}</td>
+                        <td>${this.getTransactionDetails(transaction)}</td>
+                        <td>${transaction.type !== 'transfer' ? 
+                              this.getAssetName(transaction.assetId) : 
+                              `${this.getAssetName(transaction.sourceAssetId)} → ${this.getAssetName(transaction.targetAssetId)}`}</td>
+                        <td class="${amountClass}">${amountPrefix} Rp ${this.formatNumber(this.getTransactionTotal(transaction))}</td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                
+                // Footer
+                const footer = document.createElement('div');
+                footer.className = 'pdf-footer';
+                footer.textContent = '© 2025 Wallet Wise - Aplikasi Pengelolaan Keuangan Pribadi';
+                
+                // Menggabungkan semua elemen
+                pdfPage.appendChild(header);
+                pdfPage.appendChild(table);
+                pdfPage.appendChild(footer);
+                
+                pdfContainer.appendChild(style);
+                pdfContainer.appendChild(pdfPage);
+                
+                // Simpan state aplikasi saat ini
+                const originalOverflow = document.body.style.overflow;
+                
+                // Print PDF
+                document.body.style.overflow = 'visible';
+                window.print();
+                
+                // Kembalikan state aplikasi setelah print
+                document.body.style.overflow = originalOverflow;
+                
+                // Bersihkan kontainer PDF
+                setTimeout(() => {
+                    pdfContainer.innerHTML = '';
+                }, 500);
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                alert('Terjadi kesalahan saat mengekspor PDF. Silakan coba lagi.');
             }
-            
-            // Validasi URL berhasil, proses ekspor bisa dilanjutkan
-            // Dalam implementasi nyata, ini bisa menggunakan Google Sheets API
-            
-            // Untuk demo, kita akan menampilkan pesan sukses saja
-            alert('Transaksi berhasil diekspor ke Google Sheets.\n\nCatatan: Dalam aplikasi sebenarnya, ini akan terhubung ke Google Sheets API untuk mengunggah data Anda.');
-            
-            // Simpan URL sheet ke local storage untuk penggunaan mendatang
-            localStorage.setItem('lastUsedGoogleSheetUrl', this.sheetsUrl);
-            
-            this.closeSheetsModal();
         }
     }
 }
@@ -508,7 +601,8 @@ export default {
     padding-bottom: 40px;
 }
 
-:deep(.absolute) {
+:deep(.absolute
+) {
     z-index: 1000 !important;
 }
 
@@ -646,18 +740,18 @@ i.fas.fa-history.text-gray-100 {
     pointer-events: none !important;
 }
 
-/* Google Sheets Modal Styles */
-.modal-content.max-w-md {
-    max-width: 28rem;
+/* PDF Export styles */
+.pdf-export-container {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
 }
 
-.list-decimal {
-    list-style-type: decimal;
-}
-
-#sheetsExportModal a {
-    color: #1a73e8;
-    font-weight: 500;
-    text-decoration: underline;
+@media print {
+    .pdf-export-container {
+        display: block;
+    }
 }
 </style>
