@@ -120,27 +120,6 @@
                     </div>
 
                     <div>
-                        <label for="platform" class="block text-gray-700 mb-1 text-sm font-medium">Platform</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <i class="fas fa-building"></i>
-                            </span>
-                            <div id="platform" @click="showPlatformDropdown = !showPlatformDropdown"
-                                class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer flex justify-between items-center">
-                                <span>{{ getPlatformLabel }}</span>
-                                <i class="fas fa-chevron-down text-gray-500"></i>
-                            </div>
-                            <div v-if="showPlatformDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                                <div v-for="option in platformOptions" :key="option.value"
-                                    @click="selectPlatform(option.value)"
-                                    class="px-3 py-2 cursor-pointer hover:bg-gray-100">
-                                    {{ option.label }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
                         <label for="adminFee" class="block text-gray-700 mb-1 text-sm font-medium">Biaya Admin
                             (Rp)</label>
                         <div class="relative">
@@ -225,7 +204,6 @@ export default {
     data() {
         return {
             showCategoryDropdown: false,
-            showPlatformDropdown: false,
             showAssetDropdown: false,
             showSourceAssetDropdown: false,
             showTargetAssetDropdown: false,
@@ -236,7 +214,6 @@ export default {
                 date: new Date().toISOString().substr(0, 10),
                 category: 'makanan',
                 recipient: '',
-                platform: 'bank',
                 adminFee: 0,
                 assetId: 'cash',
                 sourceAssetId: 'cash',
@@ -249,12 +226,6 @@ export default {
                 { value: 'hiburan', label: 'Hiburan' },
                 { value: 'utilitas', label: 'Utilitas' },
                 { value: 'gaji', label: 'Gaji' },
-                { value: 'lainnya', label: 'Lainnya' }
-            ],
-            platformOptions: [
-                { value: 'bank', label: 'Bank Transfer' },
-                { value: 'ewallet', label: 'E-Wallet' },
-                { value: 'tunai', label: 'Tunai' },
                 { value: 'lainnya', label: 'Lainnya' }
             ]
         }
@@ -272,10 +243,6 @@ export default {
         getCategoryLabel() {
             const category = this.categoryOptions.find(option => option.value === this.form.category);
             return category ? category.label : 'Pilih Kategori';
-        },
-        getPlatformLabel() {
-            const platform = this.platformOptions.find(option => option.value === this.form.platform);
-            return platform ? platform.label : 'Pilih Platform';
         },
         getAssetLabel() {
             const asset = this.assets.find(asset => asset.id === this.form.assetId);
@@ -345,7 +312,6 @@ export default {
                 date: new Date().toISOString().substr(0, 10),
                 category: 'makanan',
                 recipient: '',
-                platform: 'bank',
                 adminFee: 0,
                 assetId: 'cash',
                 sourceAssetId: 'cash',
@@ -421,19 +387,10 @@ export default {
             if (targetAssetElement && !targetAssetElement.contains(event.target) && this.showTargetAssetDropdown) {
                 this.showTargetAssetDropdown = false;
             }
-            
-            const platformElement = document.getElementById('platform');
-            if (platformElement && !platformElement.contains(event.target) && this.showPlatformDropdown) {
-                this.showPlatformDropdown = false;
-            }
         },
         selectCategory(value) {
             this.form.category = value;
             this.showCategoryDropdown = false;
-        },
-        selectPlatform(value) {
-            this.form.platform = value;
-            this.showPlatformDropdown = false;
         },
         selectAsset(value) {
             this.form.assetId = value;
