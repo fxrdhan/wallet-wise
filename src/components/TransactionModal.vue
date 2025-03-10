@@ -167,7 +167,7 @@
                     </div>
                 </div>
 
-                <div v-if="form.type !== 'transfer'" id="categoryField">
+                <div v-if="form.type !== 'transfer' || (isInterBankTransfer && form.recordAsExpense)" id="categoryField">
                     <label for="category" class="block text-gray-700 mb-1 text-sm font-medium">Kategori</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
