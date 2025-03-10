@@ -77,11 +77,11 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <h4 class="text-sm text-gray-600">Pengeluaran Terbesar</h4>
-                                <p class="text-xl font-bold text-blue-600 capitalize">
-                                    {{ topCategory ? topCategory.category : '-' }}
+                                <p class="text-xl font-bold text-blue-600">
+                                    Rp {{ formatNumber(topCategory ? topCategory.amount : 0) }}
                                 </p>
-                                <p class="text-sm text-gray-500">
-                                    {{ topCategory ? `Rp ${formatNumber(topCategory.amount)}` : '' }}
+                                <p class="text-sm text-gray-500 capitalize" v-if="topCategory && topCategory.category">
+                                    {{ topCategory.category }}
                                 </p>
                             </div>
                             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
