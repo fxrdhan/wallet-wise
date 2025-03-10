@@ -1,7 +1,7 @@
 <!-- src/views/History.vue -->
 <template>
     <div class="transaction-history">
-        <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">            
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
             <div class="flex items-center justify-between mb-6 relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800 flex-shrink-0">{{ filterTitle }}</h2>
                 <div class="flex space-x-3 mt-2 sm:mt-0 justify-end relative z-20">
@@ -20,7 +20,18 @@
                         <template #button-content>
                             <i class="fas fa-download relative z-20"></i>
                         </template>
-                        <!-- Add export menu items here -->
+                        <MenuItem v-slot="{ active }">
+                            <button @click="exportToCSV()" 
+                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
+                                <i class="fas fa-file-csv mr-2 text-green-600"></i> Export CSV
+                            </button>
+                        </MenuItem>
+                        <MenuItem v-slot="{ active }">
+                            <button @click="showGoogleSheetsModal()" 
+                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
+                                <i class="fas fa-file-excel mr-2 text-green-600"></i> Export Spreadsheet
+                            </button>
+                        </MenuItem>
                     </DropdownMenu>
                 </div>
             </div>
@@ -68,11 +79,14 @@
                                 transaction.description }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <span v-if="transaction.type !== 'transfer'">
-                                    <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i> {{ getAssetName(transaction.assetId) }}
+                                    <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i> {{
+                                    getAssetName(transaction.assetId) }}
                                 </span>
                                 <span v-else>
-                                    <i :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i> {{ getAssetName(transaction.sourceAssetId) }} → 
-                                    <i :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i> {{ getAssetName(transaction.targetAssetId) }}
+                                    <i :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i> {{
+                                    getAssetName(transaction.sourceAssetId) }} →
+                                    <i :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i> {{
+                                    getAssetName(transaction.targetAssetId) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
@@ -117,10 +131,15 @@
                                 <p class="text-sm text-gray-500 capitalize">{{ getTransactionDetails(transaction) }}</p>
                                 <p class="text-xs text-gray-400 mt-1">
                                     <span v-if="transaction.type !== 'transfer'">
-                                        <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i>{{ getAssetName(transaction.assetId) }}
+                                        <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i>{{
+                                        getAssetName(transaction.assetId) }}
                                     </span>
-                                    <span v-else><i :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i>{{ getAssetName(transaction.sourceAssetId) }}
-                                         → <i :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i>{{ getAssetName(transaction.targetAssetId) }}</span>
+                                    <span v-else><i
+                                            :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i>{{
+                                        getAssetName(transaction.sourceAssetId) }}
+                                        → <i
+                                            :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i>{{
+                                        getAssetName(transaction.targetAssetId) }}</span>
                                 </p>
                             </div>
                             <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
@@ -144,14 +163,15 @@
             <i class="fas fa-history text-gray-100 opacity-5 absolute -bottom-10 -right-10 text-9xl"></i>
         </div>
     </div>
-    
+
     <!-- Confirmation Dialog - pindahkan ke luar komponen utama -->
-    <div id="deleteConfirmationModal" class="modal" :style="{ display: showDeleteConfirmation ? 'block' : 'none' }" @click.self="cancelDelete">
+    <div id="deleteConfirmationModal" class="modal" :style="{ display: showDeleteConfirmation ? 'block' : 'none' }"
+        @click.self="cancelDelete">
         <div class="modal-content p-6">
             <button @click="cancelDelete" class="close-modal text-gray-500 hover:text-gray-800">
                 <i class="fas fa-times"></i>
             </button>
-            
+
             <div class="text-center mb-4">
                 <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-trash-alt text-red-600 text-2xl"></i>
@@ -162,22 +182,80 @@
                     <p class="font-medium flex justify-between items-center">
                         <span>{{ transactionToDelete.description }}</span>
                         <span :class="getAmountColorClass(transactionToDelete.type)">
-                            {{ getAmountPrefix(transactionToDelete.type) }} Rp {{ formatNumber(getTransactionTotal(transactionToDelete)) }}</span>
+                            {{ getAmountPrefix(transactionToDelete.type) }} Rp {{
+                                formatNumber(getTransactionTotal(transactionToDelete)) }}</span>
                     </p>
                     <p class="text-sm text-gray-500">{{ formatDateSimple(transactionToDelete.date) }}</p>
                 </div>
             </div>
             <div class="flex space-x-3 justify-center">
-                <button 
-                    @click="cancelDelete" 
+                <button @click="cancelDelete"
                     class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-gray-800 font-medium">
                     Batal
                 </button>
-                <button 
-                    @click="confirmDelete" 
+                <button @click="confirmDelete"
                     class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-medium flex items-center">
                     <i class="fas fa-trash-alt mr-2"></i> Ya, Hapus
                 </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Google Sheets Export Modal -->
+    <div id="sheetsExportModal" class="modal" :style="{ display: showSheetsModal ? 'block' : 'none' }" @click.self="closeSheetsModal">
+        <div class="modal-content p-6 max-w-md">
+            <button @click="closeSheetsModal" class="close-modal text-gray-500 hover:text-gray-800">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-file-excel text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800">Export ke Spreadsheet</h3>
+                <p class="text-gray-600 mt-2">Masukkan link Google Sheets Anda untuk mengekspor data transaksi.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="sheetsUrl" class="block text-gray-700 mb-1 text-sm font-medium">Link Google Sheets</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                            <i class="fas fa-link"></i>
+                        </span>
+                        <input type="text" id="sheetsUrl" v-model="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/..."
+                            class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Pastikan spreadsheet dapat diakses untuk menulis data (hak akses Edit).
+                    </p>
+                </div>
+                
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <h4 class="font-medium text-blue-800 mb-1">Langkah untuk membuat Google Sheets:</h4>
+                    <ol class="text-sm text-blue-700 pl-5 list-decimal">
+                        <li>Buka <a href="https://docs.google.com/spreadsheets" target="_blank" class="underline">Google Sheets</a></li>
+                        <li>Buat spreadsheet baru</li>
+                        <li>Klik tombol Share di kanan atas</li>
+                        <li>Ubah akses menjadi "Anyone with the link can edit"</li>
+                        <li>Salin link dan tempel di sini</li>
+                    </ol>
+                </div>
+                
+                <div class="pt-2">
+                    <button 
+                        @click="exportToGoogleSheets" 
+                        :disabled="!isValidSheetsUrl"
+                        :class="[
+                            'w-full py-2 px-4 rounded-lg font-medium flex items-center justify-center',
+                            isValidSheetsUrl 
+                                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        ]">
+                        <i class="fas fa-file-export mr-2"></i>
+                        Export Data
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -196,6 +274,8 @@ export default {
             showDeleteConfirmation: false,
             deleteTransactionId: null,
             transactionToDelete: null,
+            showSheetsModal: false,
+            sheetsUrl: '',
             filterAssetId: null,
             filterOptions: [
                 { value: 'all', label: 'Semua', icon: 'fas fa-list text-gray-500' },
@@ -224,7 +304,12 @@ export default {
                 return this.$store.getters.sortedTransactions.filter(t =>
                     t.assetId === this.filterAssetId || t.sourceAssetId === this.filterAssetId || t.targetAssetId === this.filterAssetId);
             }
+            
             return this.$store.getters.sortedTransactions;
+        },
+        isValidSheetsUrl() {
+            return this.sheetsUrl.trim() !== '' && 
+                  (this.sheetsUrl.includes('docs.google.com/spreadsheets') || this.sheetsUrl.includes('sheets.google.com'));
         }
     },
     watch: {
@@ -317,6 +402,101 @@ export default {
         getAssetType(assetId) {
             const asset = this.$store.state.assets.find(a => a.id === assetId);
             return asset ? asset.type : 'cash';
+        },
+        exportToCSV() {
+            try {
+                // Mendapatkan transaksi berdasarkan filter saat ini
+                const transactionsToExport = this.transactions;
+                
+                if (transactionsToExport.length === 0) {
+                    alert('Tidak ada data transaksi untuk diekspor.');
+                    return;
+                }
+                
+                // Menyiapkan header CSV
+                const headers = [
+                    'Tanggal', 
+                    'Deskripsi', 
+                    'Tipe', 
+                    'Kategori', 
+                    'Aset', 
+                    'Dari', 
+                    'Tujuan', 
+                    'Jumlah', 
+                    'Biaya Admin', 
+                    'Total'
+                ];
+                
+                // Menyiapkan data CSV
+                const csvRows = [];
+                
+                // Menambahkan header
+                csvRows.push(headers.join(','));
+                
+                // Menambahkan data transaksi
+                transactionsToExport.forEach(transaction => {
+                    const row = [
+                        this.formatDateSimple(transaction.date),
+                        '"' + transaction.description.replace(/"/g, '""') + '"', // Menggunakan double quotes untuk menangani koma dalam teks
+                        transaction.type === 'income' ? 'Pemasukan' : 
+                            transaction.type === 'expense' ? 'Pengeluaran' : 'Transfer',
+                        transaction.category ? '"' + this.capitalizeFirstLetter(transaction.category) + '"' : '',
+                        transaction.type !== 'transfer' ? this.getAssetName(transaction.assetId) : '',
+                        transaction.type === 'transfer' ? this.getAssetName(transaction.sourceAssetId) : '',
+                        transaction.type === 'transfer' ? this.getAssetName(transaction.targetAssetId) : '',
+                        transaction.amount,
+                        transaction.type === 'transfer' ? (transaction.adminFee || 0) : '',
+                        this.getTransactionTotal(transaction)
+                    ];
+                    
+                    csvRows.push(row.join(','));
+                });
+                
+                // Membuat konten CSV
+                const csvContent = csvRows.join('\n');
+                
+                // Membuat Blob dan link download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                
+                // Membuat link dan memicu download
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `wallet-wise-transaksi-${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Error exporting CSV:', error);
+                alert('Terjadi kesalahan saat mengekspor data. Silakan coba lagi.');
+            }
+        },
+        showGoogleSheetsModal() {
+            this.showSheetsModal = true;
+            document.body.style.overflow = 'hidden';
+        },
+        closeSheetsModal() {
+            this.showSheetsModal = false;
+            document.body.style.overflow = '';
+        },
+        exportToGoogleSheets() {
+            if (!this.isValidSheetsUrl) {
+                alert('Mohon masukkan URL Google Sheets yang valid.');
+                return;
+            }
+            
+            // Validasi URL berhasil, proses ekspor bisa dilanjutkan
+            // Dalam implementasi nyata, ini bisa menggunakan Google Sheets API
+            
+            // Untuk demo, kita akan menampilkan pesan sukses saja
+            alert('Transaksi berhasil diekspor ke Google Sheets.\n\nCatatan: Dalam aplikasi sebenarnya, ini akan terhubung ke Google Sheets API untuk mengunggah data Anda.');
+            
+            // Simpan URL sheet ke local storage untuk penggunaan mendatang
+            localStorage.setItem('lastUsedGoogleSheetUrl', this.sheetsUrl);
+            
+            this.closeSheetsModal();
         }
     }
 }
@@ -464,5 +644,20 @@ i.fas.fa-history.text-gray-100 {
 i.fas.fa-history.text-gray-100 {
     z-index: 1 !important;
     pointer-events: none !important;
+}
+
+/* Google Sheets Modal Styles */
+.modal-content.max-w-md {
+    max-width: 28rem;
+}
+
+.list-decimal {
+    list-style-type: decimal;
+}
+
+#sheetsExportModal a {
+    color: #1a73e8;
+    font-weight: 500;
+    text-decoration: underline;
 }
 </style>
