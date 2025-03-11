@@ -193,7 +193,7 @@
                                             {{ formatPercentage(activeSlice?.percentage || 100) }}%
                                         </text>
                                         <text text-anchor="middle" y="25" class="text-s" fill="#6B7280">
-                                            {{ activeSlice?.category || 'Semua Kategori' }}
+                                            {{ activeSlice ? capitalize(activeSlice.category) : 'Semua Kategori' }}
                                         </text>
                                     </g>
                                 </svg>
@@ -207,7 +207,7 @@
                             style="transform-origin: top center;">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <h4 class="text-sm text-gray-600 pb-1"><span class="font-medium capitalize">{{ activeSlice.category }}</span></h4>
+                                    <h4 class="text-sm text-gray-600 pb-1"><span class="font-medium capitalize">{{ capitalize(activeSlice.category) }}</span></h4>
                                     <p class="text-xl font-bold" :style="`color: ${getColorForCategory(activeSlice.category)}`">
                                         Rp {{ formatNumber(activeSlice.amount) }}
                                     </p>
@@ -394,6 +394,13 @@ export default {
             const radius = 170;
             // Only apply enlargement effect when hovering (activeSlice)
             const effectiveRadius = this.activeSlice === slice ? 185 : radius;
+            
+            // Special case for single category (100%)
+            if (Math.abs(slice.percentage - 100) < 0.1) {
+                // Draw a complete circle for 100%
+                return `M 0 -${effectiveRadius} A ${effectiveRadius} ${effectiveRadius} 0 1 1 0 ${effectiveRadius} A ${effectiveRadius} ${effectiveRadius} 0 1 1 0 -${effectiveRadius}`;
+            }
+            
             let startAngle = 0;
 
             for (let i = 0; i < this.expensePieData.indexOf(slice); i++) {
@@ -464,7 +471,11 @@ export default {
         },
         addTransaction() {
             this.$store.dispatch('showModal');
-        }
+        },
+        capitalize(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        },
     },
     mounted() {
         this.updateChartData();
