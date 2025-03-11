@@ -185,7 +185,7 @@
         </div>
     </div>
     
-    <!-- Hidden input for file import -->
+    <!-- Hidden file input for CSV import -->
     <input type="file" ref="fileInput" accept=".csv" style="display: none" @change="handleFileSelected" />
 
     <!-- Confirmation Dialog - pindahkan ke luar komponen utama -->
@@ -225,6 +225,44 @@
         </div>
     </div>
 
+    <!-- Import Confirmation Dialog -->
+    <div id="importConfirmationModal" class="modal" :style="{ display: showImportConfirmation ? 'block' : 'none' }"
+        @click.self="cancelImport">
+        <div class="modal-content p-6">
+            <button @click="cancelImport" class="close-modal text-gray-500 hover:text-gray-800">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="text-center mb-4">
+                <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-file-csv text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800">Konfirmasi Impor</h3>
+                <p class="text-gray-600 mt-2">Apakah Anda yakin ingin mengimpor data transaksi berikut?</p>
+                
+                <div class="bg-gray-50 p-4 rounded-lg mt-3 text-left">
+                    <div class="grid grid-cols-2 gap-2">
+                        <p class="text-sm text-gray-500">Total Transaksi:</p>
+                        <p class="text-sm font-medium text-right">{{ importData.total }}</p>
+                        
+                        <p class="text-sm text-gray-500">Total Pemasukan:</p>
+                        <p class="text-sm font-medium text-green-600 text-right">Rp {{ formatNumber(importData.totalIncome) }}</p>
+                        
+                        <p class="text-sm text-gray-500">Total Pengeluaran:</p>
+                        <p class="text-sm font-medium text-red-600 text-right">Rp {{ formatNumber(importData.totalExpense) }}</p>
+                        
+                        <p class="text-sm text-gray-500">Rentang Tanggal:</p>
+                        <p class="text-sm font-medium text-right">{{ importData.dateRange }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-3 justify-center">
+                <button @click="cancelImport" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-gray-800 font-medium">Batal</button>
+                <button @click="confirmImport" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-white font-medium flex items-center"><i class="fas fa-file-import mr-2"></i> Ya, Impor</button>
+            </div>
+        </div>
+    </div>
+
     <!-- PDF Export invisible container -->
     <div ref="pdfContent" class="pdf-export-container"></div>
 </template>
@@ -242,6 +280,14 @@ export default {
             showDeleteConfirmation: false,
             deleteTransactionId: null,
             transactionToDelete: null,
+            showImportConfirmation: false,
+            importData: {
+                transactions: [],
+                total: 0,
+                totalIncome: 0,
+                totalExpense: 0,
+                dateRange: '',
+            },
             showImportLoader: false,
             filterAssetId: null,
             filterOptions: [
@@ -277,6 +323,13 @@ export default {
     },
     watch: {
         showDeleteConfirmation(val) {
+            if (val) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        },
+        showImportConfirmation(val) {
             if (val) {
                 document.body.style.overflow = 'hidden';
             } else {
@@ -620,81 +673,122 @@ export default {
             // Trigger click pada input file
             this.$refs.fileInput.click();
         },
-        handleFileSelected(event) {
+        async handleFileSelected(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if (!file) {
+                this.$refs.fileInput.value = '';
+                return;
+            }
             
-            // Baca file sebagai teks
-            const reader = new FileReader();
-            reader.readAsText(file);
-            
-            reader.onload = (e) => {
-                try {
-                    // Reset file input
-                    this.$refs.fileInput.value = '';
-                    
-                    if (!e.target.result || e.target.result.trim() === '') {
-                        throw new Error('File kosong atau tidak valid');
-                    }
-                    
-                    // Parsing CSV
-                    const csvContent = e.target.result;
-                    const lines = csvContent.split('\n');
-                    const headers = lines[0].split(',');
-                    
-                    // Validasi header minimal yang dibutuhkan
-                    const requiredHeaders = ['Tanggal', 'Deskripsi', 'Tipe', 'Jumlah'];
-                    const missingHeaders = requiredHeaders.filter(
-                        header => !headers.includes(header)
-                    );
-                    
-                    if (missingHeaders.length > 0) {
-                        throw new Error(`File CSV tidak valid. Header yang diperlukan tidak ditemukan: ${missingHeaders.join(', ')}`);
-                    }
-                    
-                    // Memproses baris data
-                    const transactions = [];
-                    for (let i = 1; i < lines.length; i++) {
-                        if (!lines[i].trim()) continue; // Lewati baris kosong
-                        
-                        // Split CSV dengan benar (menangani teks dengan koma)
-                        const values = this.parseCSVLine(lines[i]);
-                        
-                        if (values.length !== headers.length) {
-                            console.warn(`Baris ${i+1} memiliki jumlah kolom yang tidak sesuai dan akan dilewati`);
-                            continue;
-                        }
-                        
-                        // Buat objek dari header dan nilai
-                        const rowData = {};
-                        headers.forEach((header, index) => {
-                            rowData[header] = values[index];
-                        });
-                        
-                        // Konversi data ke format yang sesuai dengan store
-                        const transaction = this.convertImportedRowToTransaction(rowData);
-                        if (transaction) {
-                            transactions.push(transaction);
-                        }
-                    }
-                    
-                    if (transactions.length === 0) {
-                        throw new Error("Tidak ada transaksi valid yang ditemukan dalam file.");
-                    }
-                    
-                    // Tampilkan konfirmasi
-                    if (confirm(`Ditemukan ${transactions.length} transaksi. Impor data ini?`)) {
-                        // Impor transaksi ke store
-                        this.importTransactions(transactions);
-                    }
-                } catch (error) {
-                    console.error('Error parsing CSV:', error);
-                    alert(`Gagal mengimpor data: ${error.message}`);
+            try {
+                // Baca file sebagai teks
+                const csvContent = await this.readFileAsText(file);
+                
+                // Reset file input
+                this.$refs.fileInput.value = '';
+                
+                if (!csvContent || csvContent.trim() === '') {
+                    throw new Error('File kosong atau tidak valid');
                 }
-            };
+                
+                // Parsing CSV
+                const lines = csvContent.split('\n');
+                const headers = lines[0].split(',');
+                
+                // Validasi header minimal yang dibutuhkan
+                const requiredHeaders = ['Tanggal', 'Deskripsi', 'Tipe', 'Jumlah'];
+                const missingHeaders = requiredHeaders.filter(
+                    header => !headers.includes(header)
+                );
+                
+                if (missingHeaders.length > 0) {
+                    throw new Error(`File CSV tidak valid. Header yang diperlukan tidak ditemukan: ${missingHeaders.join(', ')}`);
+                }
+                
+                // Memproses baris data
+                const transactions = [];
+                let totalIncome = 0;
+                let totalExpense = 0;
+                let minDate = new Date();
+                let maxDate = new Date(0);
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue; // Lewati baris kosong
+                    
+                    // Split CSV dengan benar (menangani teks dengan koma)
+                    const values = this.parseCSVLine(lines[i]);
+                    
+                    if (values.length !== headers.length) {
+                        console.warn(`Baris ${i+1} memiliki jumlah kolom yang tidak sesuai dan akan dilewati`);
+                        continue;
+                    }
+                    
+                    // Buat objek dari header dan nilai
+                    const rowData = {};
+                    headers.forEach((header, index) => {
+                        rowData[header] = values[index];
+                    });
+                    
+                    // Konversi data ke format yang sesuai dengan store
+                    const transaction = this.convertImportedRowToTransaction(rowData);
+                    if (transaction) {
+                        transactions.push(transaction);
+                        
+                        // Hitung total income dan expense
+                        if (transaction.type === 'income') {
+                            totalIncome += transaction.amount;
+                        } else if (transaction.type === 'expense') {
+                            totalExpense += transaction.amount;
+                        }
+                        
+                        // Update rentang tanggal
+                        const transDate = new Date(transaction.date);
+                        if (transDate < minDate) minDate = transDate;
+                        if (transDate > maxDate) maxDate = transDate;
+                    }
+                }
+                
+                if (transactions.length === 0) {
+                    throw new Error("Tidak ada transaksi valid yang ditemukan dalam file.");
+                }
+                
+                // Siapkan data untuk konfirmasi
+                this.importData = {
+                    transactions: transactions,
+                    total: transactions.length,
+                    totalIncome: totalIncome,
+                    totalExpense: totalExpense,
+                    dateRange: `${this.formatDateSimple(minDate)} - ${this.formatDateSimple(maxDate)}`
+                };
+                
+                // Tampilkan dialog konfirmasi
+                this.showImportConfirmation = true;
             
-            reader.onerror = () => {
-                alert('Gagal membaca file. Silakan coba lagi.');
+            } catch (error) {
+                console.error('Error parsing CSV:', error);
+                alert(`Gagal mengimpor data: ${error.message}`);
+            }
+        },
+        readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Gagal membaca file. Silakan coba lagi.'));
+            });
+        },
+        confirmImport() {
+            this.importTransactions(this.importData.transactions);
+            this.showImportConfirmation = false;
+        },
+        cancelImport() {
+            this.showImportConfirmation = false;
+            this.importData = {
+                transactions: [],
+                total: 0,
+                totalIncome: 0,
+                totalExpense: 0,
+                dateRange: ''
             };
         },
         parseCSVLine(line) {
@@ -809,64 +903,21 @@ export default {
             }
         },
         importTransactions(transactions) {
-            this.showImportLoader = true;
-            
-            // Cek duplikasi dan filter transaksi
-            const existingTransactions = this.$store.state.transactions;
-            const newTransactions = [];
-            const duplicates = [];
-            
-            // Helper untuk memeriksa apakah transaksi serupa sudah ada
-            const isSimilarTransaction = (t1, t2) => {
-                // Bandingkan tanggal (tahun, bulan, hari), jumlah, deskripsi, dan tipe
-                const date1 = new Date(t1.date);
-                const date2 = new Date(t2.date);
-                
-                return date1.getFullYear() === date2.getFullYear() &&
-                       date1.getMonth() === date2.getMonth() &&
-                       date1.getDate() === date2.getDate() &&
-                       t1.amount === t2.amount &&
-                       t1.description === t2.description &&
-                       t1.type === t2.type;
-            };
-            
-            // Filter transaksi yang kemungkinan duplikat
+            // Impor semua transaksi
             transactions.forEach(transaction => {
-                const isDuplicate = existingTransactions.some(existing => isSimilarTransaction(existing, transaction));
-                
-                if (isDuplicate) {
-                    duplicates.push(transaction);
-                } else {
-                    newTransactions.push(transaction);
-                }
-            });
-            
-            // Jika ada duplikat, konfirmasi dengan user
-            if (duplicates.length > 0) {
-                const confirmMessage = `Ditemukan ${duplicates.length} transaksi yang mungkin duplikat. Impor hanya ${newTransactions.length} transaksi baru?`;
-                
-                if (!confirm(confirmMessage)) {
-                    this.showImportLoader = false;
-                    return;
-                }
-            }
-            
-            // Jika tidak ada transaksi baru yang valid
-            if (newTransactions.length === 0) {
-                this.showImportLoader = false;
-                alert('Tidak ada transaksi baru yang dapat diimpor.');
-                return;
-            }
-            
-            // Impor transaksi satu per satu untuk memastikan logika bisnis store berjalan
-            newTransactions.forEach(transaction => {
                 this.$store.dispatch('addTransaction', transaction);
             });
+
+            // Tampilkan notifikasi
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow';
+            notification.innerHTML = `<div class="flex"><div class="flex-shrink-0"><i class="fas fa-check-circle"></i></div><div class="ml-3"><p class="font-medium">${transactions.length} transaksi berhasil diimpor</p></div></div>`;
+            document.body.appendChild(notification);
             
+            // Hilangkan notifikasi setelah 3 detik
             setTimeout(() => {
-                this.showImportLoader = false;
-                alert(`Berhasil mengimpor ${newTransactions.length} transaksi baru.`);
-            }, 500); // Delay kecil untuk animasi
+                document.body.removeChild(notification);
+            }, 3000);
         }
     }
 }
