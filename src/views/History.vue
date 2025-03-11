@@ -21,16 +21,27 @@
                             <i class="fas fa-download relative z-20"></i>
                         </template>
                         <MenuItem v-slot="{ active }">
-                            <button @click="exportToCSV()" 
-                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
-                                <i class="fas fa-file-csv mr-2 text-green-600"></i> Export ke CSV
-                            </button>
+                        <button @click="importFromCSV()"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
+                            <i class="fas fa-file-csv mr-2 text-blue-600"></i> Import dari CSV
+                        </button>
+                        </MenuItem>
+                    </DropdownMenu>
+                    <DropdownMenu class="icon-only-dropdown">
+                        <template #button-content>
+                            <i class="fas fa-upload relative z-20"></i>
+                        </template>
+                        <MenuItem v-slot="{ active }">
+                        <button @click="exportToCSV()"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
+                            <i class="fas fa-file-csv mr-2 text-green-600"></i> Export ke CSV
+                        </button>
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
-                            <button @click="exportToPDF()" 
-                                :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
-                                <i class="fas fa-file-pdf mr-2 text-red-600"></i> Export ke PDF
-                            </button>
+                        <button @click="exportToPDF()"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex w-full items-center px-4 py-3 text-left text-sm']">
+                            <i class="fas fa-file-pdf mr-2 text-red-600"></i> Export ke PDF
+                        </button>
                         </MenuItem>
                     </DropdownMenu>
                 </div>
@@ -80,13 +91,13 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <span v-if="transaction.type !== 'transfer'">
                                     <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i> {{
-                                    getAssetName(transaction.assetId) }}
+                                        getAssetName(transaction.assetId) }}
                                 </span>
                                 <span v-else>
                                     <i :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i> {{
-                                    getAssetName(transaction.sourceAssetId) }} →
+                                        getAssetName(transaction.sourceAssetId) }} →
                                     <i :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i> {{
-                                    getAssetName(transaction.targetAssetId) }}
+                                        getAssetName(transaction.targetAssetId) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
@@ -132,14 +143,14 @@
                                 <p class="text-xs text-gray-400 mt-1">
                                     <span v-if="transaction.type !== 'transfer'">
                                         <i :class="getAssetIcon(getAssetType(transaction.assetId)) + ' mr-1'"></i>{{
-                                        getAssetName(transaction.assetId) }}
+                                            getAssetName(transaction.assetId) }}
                                     </span>
                                     <span v-else><i
                                             :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i>{{
-                                        getAssetName(transaction.sourceAssetId) }}
+                                                getAssetName(transaction.sourceAssetId) }}
                                         → <i
                                             :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i>{{
-                                        getAssetName(transaction.targetAssetId) }}</span>
+                                                getAssetName(transaction.targetAssetId) }}</span>
                                 </p>
                             </div>
                             <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
@@ -163,6 +174,19 @@
             <i class="fas fa-history text-gray-100 opacity-5 absolute -bottom-10 -right-10 text-9xl"></i>
         </div>
     </div>
+    
+    <!-- Import loading overlay -->
+    <div v-if="showImportLoader" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg text-center">
+            <div class="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-4 animate-spin"></div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Mengimpor Data</h3>
+            <p class="text-gray-600">Mohon tunggu, sedang memproses data transaksi...</p>
+            <p class="text-sm text-gray-500 mt-2">Ini mungkin memerlukan waktu beberapa saat.</p>
+        </div>
+    </div>
+    
+    <!-- Hidden input for file import -->
+    <input type="file" ref="fileInput" accept=".csv" style="display: none" @change="handleFileSelected" />
 
     <!-- Confirmation Dialog - pindahkan ke luar komponen utama -->
     <div id="deleteConfirmationModal" class="modal" :style="{ display: showDeleteConfirmation ? 'block' : 'none' }"
@@ -200,7 +224,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- PDF Export invisible container -->
     <div ref="pdfContent" class="pdf-export-container"></div>
 </template>
@@ -218,6 +242,7 @@ export default {
             showDeleteConfirmation: false,
             deleteTransactionId: null,
             transactionToDelete: null,
+            showImportLoader: false,
             filterAssetId: null,
             filterOptions: [
                 { value: 'all', label: 'Semua', icon: 'fas fa-list text-gray-500' },
@@ -246,7 +271,7 @@ export default {
                 return this.$store.getters.sortedTransactions.filter(t =>
                     t.assetId === this.filterAssetId || t.sourceAssetId === this.filterAssetId || t.targetAssetId === this.filterAssetId);
             }
-            
+
             return this.$store.getters.sortedTransactions;
         },
     },
@@ -345,38 +370,38 @@ export default {
             try {
                 // Mendapatkan transaksi berdasarkan filter saat ini
                 const transactionsToExport = this.transactions;
-                
+
                 if (transactionsToExport.length === 0) {
                     alert('Tidak ada data transaksi untuk diekspor.');
                     return;
                 }
-                
+
                 // Menyiapkan header CSV
                 const headers = [
-                    'Tanggal', 
-                    'Deskripsi', 
-                    'Tipe', 
-                    'Kategori', 
-                    'Aset', 
-                    'Dari', 
-                    'Tujuan', 
-                    'Jumlah', 
-                    'Biaya Admin', 
+                    'Tanggal',
+                    'Deskripsi',
+                    'Tipe',
+                    'Kategori',
+                    'Aset',
+                    'Dari',
+                    'Tujuan',
+                    'Jumlah',
+                    'Biaya Admin',
                     'Total'
                 ];
-                
+
                 // Menyiapkan data CSV
                 const csvRows = [];
-                
+
                 // Menambahkan header
                 csvRows.push(headers.join(','));
-                
+
                 // Menambahkan data transaksi
                 transactionsToExport.forEach(transaction => {
                     const row = [
                         this.formatDateSimple(transaction.date),
                         '"' + transaction.description.replace(/"/g, '""') + '"', // Menggunakan double quotes untuk menangani koma dalam teks
-                        transaction.type === 'income' ? 'Pemasukan' : 
+                        transaction.type === 'income' ? 'Pemasukan' :
                             transaction.type === 'expense' ? 'Pengeluaran' : 'Transfer',
                         transaction.category ? '"' + this.capitalizeFirstLetter(transaction.category) + '"' : '',
                         transaction.type !== 'transfer' ? this.getAssetName(transaction.assetId) : '',
@@ -386,23 +411,23 @@ export default {
                         transaction.type === 'transfer' ? (transaction.adminFee || 0) : '',
                         this.getTransactionTotal(transaction)
                     ];
-                    
+
                     csvRows.push(row.join(','));
                 });
-                
+
                 // Membuat konten CSV
                 const csvContent = csvRows.join('\n');
-                
+
                 // Membuat Blob dan link download
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
-                
+
                 // Membuat link dan memicu download
                 const link = document.createElement('a');
                 link.setAttribute('href', url);
                 link.setAttribute('download', `wallet-wise-transaksi-${new Date().toISOString().split('T')[0]}.csv`);
                 link.style.visibility = 'hidden';
-                
+
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -415,7 +440,7 @@ export default {
             try {
                 // Mendapatkan transaksi berdasarkan filter saat ini
                 const transactionsToExport = this.transactions;
-                
+
                 if (transactionsToExport.length === 0) {
                     alert('Tidak ada data transaksi untuk diekspor.');
                     return;
@@ -494,30 +519,30 @@ export default {
                         }
                     }
                 `;
-                
+
                 // Membuat konten PDF
                 const pdfPage = document.createElement('div');
                 pdfPage.className = 'pdf-page';
-                
+
                 // Header
                 const header = document.createElement('div');
                 header.className = 'pdf-header';
-                
+
                 const title = document.createElement('div');
                 title.className = 'pdf-title';
                 title.textContent = 'Laporan Transaksi Wallet Wise';
-                
+
                 const subtitle = document.createElement('div');
                 subtitle.className = 'pdf-subtitle';
                 subtitle.textContent = `Diekspor pada: ${new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}`;
-                
+
                 header.appendChild(title);
                 header.appendChild(subtitle);
-                
+
                 // Tabel transaksi
                 const table = document.createElement('table');
                 table.className = 'pdf-table';
-                
+
                 // Header tabel
                 const thead = document.createElement('thead');
                 thead.innerHTML = `<tr>
@@ -528,60 +553,60 @@ export default {
                     <th>Aset</th>
                     <th>Jumlah</th>
                 </tr>`;
-                
+
                 // Isi tabel
                 const tbody = document.createElement('tbody');
-                
+
                 transactionsToExport.forEach(transaction => {
                     const row = document.createElement('tr');
-                    
+
                     // Tentukan class warna berdasarkan tipe transaksi
-                    const amountClass = transaction.type === 'income' ? 'text-green' : 
-                                        transaction.type === 'expense' ? 'text-red' : 'text-purple';
-                    
+                    const amountClass = transaction.type === 'income' ? 'text-green' :
+                        transaction.type === 'expense' ? 'text-red' : 'text-purple';
+
                     const amountPrefix = transaction.type === 'income' ? '+' : '-';
-                    
+
                     row.innerHTML = `
                         <td>${this.formatDateSimple(transaction.date)}</td>
                         <td>${transaction.description}</td>
-                        <td>${transaction.type === 'income' ? 'Pemasukan' : 
-                              transaction.type === 'expense' ? 'Pengeluaran' : 'Transfer'}</td>
+                        <td>${transaction.type === 'income' ? 'Pemasukan' :
+                            transaction.type === 'expense' ? 'Pengeluaran' : 'Transfer'}</td>
                         <td>${this.getTransactionDetails(transaction)}</td>
-                        <td>${transaction.type !== 'transfer' ? 
-                              this.getAssetName(transaction.assetId) : 
-                              `${this.getAssetName(transaction.sourceAssetId)} → ${this.getAssetName(transaction.targetAssetId)}`}</td>
+                        <td>${transaction.type !== 'transfer' ?
+                            this.getAssetName(transaction.assetId) :
+                            `${this.getAssetName(transaction.sourceAssetId)} → ${this.getAssetName(transaction.targetAssetId)}`}</td>
                         <td class="${amountClass}">${amountPrefix} Rp ${this.formatNumber(this.getTransactionTotal(transaction))}</td>
                     `;
-                    
+
                     tbody.appendChild(row);
                 });
-                
+
                 table.appendChild(thead);
                 table.appendChild(tbody);
-                
+
                 // Footer
                 const footer = document.createElement('div');
                 footer.className = 'pdf-footer';
                 footer.textContent = '© 2025 Wallet Wise - Aplikasi Pengelolaan Keuangan Pribadi';
-                
+
                 // Menggabungkan semua elemen
                 pdfPage.appendChild(header);
                 pdfPage.appendChild(table);
                 pdfPage.appendChild(footer);
-                
+
                 pdfContainer.appendChild(style);
                 pdfContainer.appendChild(pdfPage);
-                
+
                 // Simpan state aplikasi saat ini
                 const originalOverflow = document.body.style.overflow;
-                
+
                 // Print PDF
                 document.body.style.overflow = 'visible';
                 window.print();
-                
+
                 // Kembalikan state aplikasi setelah print
                 document.body.style.overflow = originalOverflow;
-                
+
                 // Bersihkan kontainer PDF
                 setTimeout(() => {
                     pdfContainer.innerHTML = '';
@@ -590,6 +615,256 @@ export default {
                 console.error('Error exporting PDF:', error);
                 alert('Terjadi kesalahan saat mengekspor PDF. Silakan coba lagi.');
             }
+        },
+        importFromCSV() {
+            // Trigger click pada input file
+            this.$refs.fileInput.click();
+        },
+        handleFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Baca file sebagai teks
+            const reader = new FileReader();
+            reader.readAsText(file);
+            
+            reader.onload = (e) => {
+                try {
+                    // Reset file input
+                    this.$refs.fileInput.value = '';
+                    
+                    if (!e.target.result || e.target.result.trim() === '') {
+                        throw new Error('File kosong atau tidak valid');
+                    }
+                    
+                    // Parsing CSV
+                    const csvContent = e.target.result;
+                    const lines = csvContent.split('\n');
+                    const headers = lines[0].split(',');
+                    
+                    // Validasi header minimal yang dibutuhkan
+                    const requiredHeaders = ['Tanggal', 'Deskripsi', 'Tipe', 'Jumlah'];
+                    const missingHeaders = requiredHeaders.filter(
+                        header => !headers.includes(header)
+                    );
+                    
+                    if (missingHeaders.length > 0) {
+                        throw new Error(`File CSV tidak valid. Header yang diperlukan tidak ditemukan: ${missingHeaders.join(', ')}`);
+                    }
+                    
+                    // Memproses baris data
+                    const transactions = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i].trim()) continue; // Lewati baris kosong
+                        
+                        // Split CSV dengan benar (menangani teks dengan koma)
+                        const values = this.parseCSVLine(lines[i]);
+                        
+                        if (values.length !== headers.length) {
+                            console.warn(`Baris ${i+1} memiliki jumlah kolom yang tidak sesuai dan akan dilewati`);
+                            continue;
+                        }
+                        
+                        // Buat objek dari header dan nilai
+                        const rowData = {};
+                        headers.forEach((header, index) => {
+                            rowData[header] = values[index];
+                        });
+                        
+                        // Konversi data ke format yang sesuai dengan store
+                        const transaction = this.convertImportedRowToTransaction(rowData);
+                        if (transaction) {
+                            transactions.push(transaction);
+                        }
+                    }
+                    
+                    if (transactions.length === 0) {
+                        throw new Error("Tidak ada transaksi valid yang ditemukan dalam file.");
+                    }
+                    
+                    // Tampilkan konfirmasi
+                    if (confirm(`Ditemukan ${transactions.length} transaksi. Impor data ini?`)) {
+                        // Impor transaksi ke store
+                        this.importTransactions(transactions);
+                    }
+                } catch (error) {
+                    console.error('Error parsing CSV:', error);
+                    alert(`Gagal mengimpor data: ${error.message}`);
+                }
+            };
+            
+            reader.onerror = () => {
+                alert('Gagal membaca file. Silakan coba lagi.');
+            };
+        },
+        parseCSVLine(line) {
+            // Fungsi untuk memecah baris CSV dengan benar, menangani teks dalam tanda kutip
+            const values = [];
+            let inQuotes = false;
+            let currentValue = '';
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(currentValue.trim());
+                    currentValue = '';
+                } else {
+                    currentValue += char;
+                }
+            }
+            
+            // Tambahkan nilai terakhir
+            values.push(currentValue.trim());
+            
+            return values;
+        },
+        convertImportedRowToTransaction(rowData) {
+            try {
+                // Konversi format tanggal
+                const dateParts = rowData['Tanggal'].split(' ');
+                const day = parseInt(dateParts[0]);
+                
+                // Map bulan Indonesia ke angka
+                const monthMap = {
+                    'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
+                    'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
+                };
+                
+                const month = monthMap[dateParts[1]];
+                const year = parseInt(dateParts[2]);
+                
+                if (isNaN(day) || month === undefined || isNaN(year)) {
+                    throw new Error('Format tanggal tidak valid');
+                }
+                
+                // Konversi tipe transaksi
+                let type;
+                switch (rowData['Tipe']) {
+                    case 'Pemasukan': type = 'income'; break;
+                    case 'Pengeluaran': type = 'expense'; break;
+                    case 'Transfer': type = 'transfer'; break;
+                    default: throw new Error('Tipe transaksi tidak valid');
+                }
+                
+                // Bersihkan nilai jumlah (hapus format Rp dan tanda ribuan)
+                const amount = parseFloat(rowData['Jumlah'].replace(/[^\d,-]/g, '').replace(/\./g, '').replace(',', '.'));
+                if (isNaN(amount)) {
+                    throw new Error('Jumlah tidak valid');
+                }
+                
+                // Cari atau buat ID aset
+                let assetId, sourceAssetId, targetAssetId;
+                
+                if (type !== 'transfer') {
+                    // Untuk transaksi income/expense, cari aset dari nama
+                    const assetName = rowData['Aset'];
+                    const asset = this.$store.state.assets.find(a => a.name === assetName);
+                    assetId = asset ? asset.id : 'cash'; // Default ke cash jika aset tidak ditemukan
+                } else {
+                    // Untuk transfer, cari aset sumber dan tujuan
+                    const sourceAssetName = rowData['Dari'];
+                    const targetAssetName = rowData['Tujuan'];
+                    
+                    const sourceAsset = this.$store.state.assets.find(a => a.name === sourceAssetName);
+                    const targetAsset = this.$store.state.assets.find(a => a.name === targetAssetName);
+                    
+                    sourceAssetId = sourceAsset ? sourceAsset.id : 'cash';
+                    targetAssetId = targetAsset ? targetAsset.id : 'bank';
+                }
+                
+                // Buat objek transaksi
+                const transaction = {
+                    description: rowData['Deskripsi'],
+                    amount: amount,
+                    type: type,
+                    date: new Date(year, month, day).toISOString(),
+                    category: type !== 'transfer' ? (rowData['Kategori'] || 'lainnya').toLowerCase() : undefined
+                };
+                
+                // Tambahkan properti berdasarkan tipe
+                if (type !== 'transfer') {
+                    transaction.assetId = assetId;
+                } else {
+                    transaction.sourceAssetId = sourceAssetId;
+                    transaction.targetAssetId = targetAssetId;
+                    
+                    // Tambahkan biaya admin jika ada
+                    if (rowData['Biaya Admin']) {
+                        const adminFee = parseFloat(rowData['Biaya Admin'].replace(/[^\d,-]/g, '').replace(/\./g, '').replace(',', '.'));
+                        if (!isNaN(adminFee)) {
+                            transaction.adminFee = adminFee;
+                        }
+                    }
+                }
+                
+                return transaction;
+            } catch (error) {
+                console.warn('Error converting row to transaction:', error, rowData);
+                return null;
+            }
+        },
+        importTransactions(transactions) {
+            this.showImportLoader = true;
+            
+            // Cek duplikasi dan filter transaksi
+            const existingTransactions = this.$store.state.transactions;
+            const newTransactions = [];
+            const duplicates = [];
+            
+            // Helper untuk memeriksa apakah transaksi serupa sudah ada
+            const isSimilarTransaction = (t1, t2) => {
+                // Bandingkan tanggal (tahun, bulan, hari), jumlah, deskripsi, dan tipe
+                const date1 = new Date(t1.date);
+                const date2 = new Date(t2.date);
+                
+                return date1.getFullYear() === date2.getFullYear() &&
+                       date1.getMonth() === date2.getMonth() &&
+                       date1.getDate() === date2.getDate() &&
+                       t1.amount === t2.amount &&
+                       t1.description === t2.description &&
+                       t1.type === t2.type;
+            };
+            
+            // Filter transaksi yang kemungkinan duplikat
+            transactions.forEach(transaction => {
+                const isDuplicate = existingTransactions.some(existing => isSimilarTransaction(existing, transaction));
+                
+                if (isDuplicate) {
+                    duplicates.push(transaction);
+                } else {
+                    newTransactions.push(transaction);
+                }
+            });
+            
+            // Jika ada duplikat, konfirmasi dengan user
+            if (duplicates.length > 0) {
+                const confirmMessage = `Ditemukan ${duplicates.length} transaksi yang mungkin duplikat. Impor hanya ${newTransactions.length} transaksi baru?`;
+                
+                if (!confirm(confirmMessage)) {
+                    this.showImportLoader = false;
+                    return;
+                }
+            }
+            
+            // Jika tidak ada transaksi baru yang valid
+            if (newTransactions.length === 0) {
+                this.showImportLoader = false;
+                alert('Tidak ada transaksi baru yang dapat diimpor.');
+                return;
+            }
+            
+            // Impor transaksi satu per satu untuk memastikan logika bisnis store berjalan
+            newTransactions.forEach(transaction => {
+                this.$store.dispatch('addTransaction', transaction);
+            });
+            
+            setTimeout(() => {
+                this.showImportLoader = false;
+                alert(`Berhasil mengimpor ${newTransactions.length} transaksi baru.`);
+            }, 500); // Delay kecil untuk animasi
         }
     }
 }
@@ -601,8 +876,7 @@ export default {
     padding-bottom: 40px;
 }
 
-:deep(.absolute
-) {
+:deep(.absolute) {
     z-index: 1000 !important;
 }
 
