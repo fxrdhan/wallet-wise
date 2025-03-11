@@ -152,37 +152,45 @@ export default createStore({
             this.commit('SAVE_ASSETS');
         },
         DELETE_TRANSACTION(state, id) {
-            // Dapatkan transaksi yang akan dihapus
-            const transaction = state.transactions.find(t => t.id === id);
+            // Hapus transaksi
+            state.transactions = state.transactions.filter(transaction => transaction.id !== id);
+            this.commit('SAVE_TRANSACTIONS');
             
-            if (transaction) {
-                // Batalkan efek transaksi pada saldo aset
+            // Rekalkulasi saldo aset
+            this.commit('RECALCULATE_ASSET_BALANCES');
+        },
+        RECALCULATE_ASSET_BALANCES(state) {
+            // Reset semua saldo asset ke 0
+            state.assets.forEach(asset => {
+                asset.balance = 0;
+            });
+            
+            // Hitung ulang saldo berdasarkan transaksi yang ada
+            state.transactions.forEach(transaction => {
                 if (transaction.type === 'income') {
                     const asset = state.assets.find(a => a.id === transaction.assetId);
                     if (asset) {
-                        asset.balance -= transaction.amount;
+                        asset.balance += transaction.amount;
                     }
                 } else if (transaction.type === 'expense') {
                     const asset = state.assets.find(a => a.id === transaction.assetId);
                     if (asset) {
-                        asset.balance += transaction.amount;
+                        asset.balance -= transaction.amount;
                     }
                 } else if (transaction.type === 'transfer') {
                     const sourceAsset = state.assets.find(a => a.id === transaction.sourceAssetId);
                     const targetAsset = state.assets.find(a => a.id === transaction.targetAssetId);
                     
                     if (sourceAsset) {
-                        sourceAsset.balance += (transaction.amount + (transaction.adminFee || 0));
+                        sourceAsset.balance -= (transaction.amount + (transaction.adminFee || 0));
                     }
                     
                     if (targetAsset) {
-                        targetAsset.balance -= transaction.amount;
+                        targetAsset.balance += transaction.amount;
                     }
                 }
-            }
-
-            state.transactions = state.transactions.filter(transaction => transaction.id !== id);
-            this.commit('SAVE_TRANSACTIONS');
+            });
+            
             this.commit('SAVE_ASSETS');
         },
         SAVE_TRANSACTIONS(state) {
@@ -250,6 +258,9 @@ export default createStore({
         },
         hideModal({ commit }) {
             commit('SET_SHOW_MODAL', false);
+        },
+        initializeStore({ commit }) {
+            commit('RECALCULATE_ASSET_BALANCES');
         }
     }
 })

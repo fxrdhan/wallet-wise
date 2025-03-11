@@ -23,6 +23,9 @@ export default {
     AppFooter,
     AppNavbar,
     TransactionModal
+  },
+  mounted() {
+    this.$store.dispatch('initializeStore');
   }
 }
 </script>
