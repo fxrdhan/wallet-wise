@@ -85,7 +85,8 @@ export default createStore({
             }
 
             state.transactions.unshift({
-                id: Date.now(),
+                // id: Date.now(),
+                id: transaction.id || Date.now() + '_' + Math.random().toString(36).slice(2, 11),
                 ...transaction
             });
             this.commit('SAVE_TRANSACTIONS');

@@ -293,6 +293,8 @@ export default {
             if (val && this.isEditing && this.editingTransaction) {
                 // Populate form with editing transaction data
                 this.form = { ...this.editingTransaction };
+                // Format the date to yyyy-MM-dd
+                this.form.date = this.formatDateForInput(this.form.date);
                 
                 // Set default values for assetId, sourceAssetId, targetAssetId if not present
                 if (!this.form.assetId && this.form.type !== 'transfer') {
@@ -329,6 +331,13 @@ export default {
     methods: {
         formatNumber(number) {
             return number.toLocaleString('id-ID').replace(/,/g, ".");
+        },
+        formatDateForInput(dateString) {
+            if (!dateString) return '';
+            
+            // Convert ISO date string to yyyy-MM-dd format
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
         },
         resetForm() {
             this.form = {

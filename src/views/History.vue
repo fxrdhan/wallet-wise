@@ -739,7 +739,9 @@ export default {
                 if (isNaN(day) || month === undefined || isNaN(year)) {
                     throw new Error('Format tanggal tidak valid');
                 }
-                
+
+                // Set waktu ke tengah hari untuk menghindari masalah timezone
+                const date = new Date(year, month, day, 12, 0, 0, 0);
                 // Konversi tipe transaksi
                 let type;
                 switch (rowData['Tipe']) {
@@ -751,7 +753,7 @@ export default {
                 
                 // Bersihkan nilai jumlah (hapus format Rp dan tanda ribuan)
                 const amount = parseFloat(rowData['Jumlah'].replace(/[^\d,-]/g, '').replace(/\./g, '').replace(',', '.'));
-                if (isNaN(amount)) {
+                if (isNaN(amount) || amount <= 0) {
                     throw new Error('Jumlah tidak valid');
                 }
                 
@@ -779,8 +781,8 @@ export default {
                 const transaction = {
                     description: rowData['Deskripsi'],
                     amount: amount,
-                    type: type,
-                    date: new Date(year, month, day).toISOString(),
+                    type: type, 
+                    date: date.toISOString(),
                     category: type !== 'transfer' ? (rowData['Kategori'] || 'lainnya').toLowerCase() : undefined
                 };
                 
