@@ -10,29 +10,34 @@
                             <span>{{ getTimeRangeLabel }}</span>
                         </template>
                         <MenuItem v-slot="{ active }">
-                            <button @click="setTimeRange('thisMonth')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
-                                Bulan Ini
-                            </button>
+                        <button @click="setTimeRange('thisMonth')"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                            Bulan Ini
+                        </button>
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
-                            <button @click="setTimeRange('threeMonths')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
-                                3 Bulan Terakhir
-                            </button>
+                        <button @click="setTimeRange('threeMonths')"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                            3 Bulan Terakhir
+                        </button>
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
-                            <button @click="setTimeRange('sixMonths')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
-                                6 Bulan Terakhir
-                            </button>
+                        <button @click="setTimeRange('sixMonths')"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                            6 Bulan Terakhir
+                        </button>
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
-                            <button @click="setTimeRange('thisYear')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
-                                Tahun Ini
-                            </button>
+                        <button @click="setTimeRange('thisYear')"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                            Tahun Ini
+                        </button>
                         </MenuItem>
                         <MenuItem v-slot="{ active }">
-                            <button @click="setTimeRange('all')" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
-                                Semua Waktu
-                            </button>
+                        <button @click="setTimeRange('all')"
+                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full px-4 py-2 text-left text-sm']">
+                            Semua Waktu
+                        </button>
                         </MenuItem>
                     </DropdownMenu>
                 </div>
@@ -56,7 +61,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Total Pengeluaran -->
                     <div class="card rounded-lg border border-gray-100 p-4 bg-red-50">
                         <div class="flex justify-between items-center">
@@ -110,47 +115,55 @@
                         <h4 class="text-lg font-semibold text-gray-700 mb-4">Distribusi berdasarkan Aset</h4>
                         <div class="space-y-3">
                             <template v-for="asset in sortedAssets" :key="asset.id">
-                                <div class="relative h-12 rounded-3xl overflow-hidden border border-gray-200">
+                                <div class="relative h-12 rounded-3xl overflow-hidden border border-gray-200"
+                                    @mouseenter="hoveredAsset = asset" @mouseleave="hoveredAsset = null">
                                     <!-- Konten teks (selalu terlihat penuh) -->
                                     <div class="absolute inset-0 flex items-center justify-between px-4 pl-2 z-10">
                                         <div class="flex items-center">
-                                            <div 
-                                                :class="{ 
-                                                    'bg-red-100 text-red-600 border-red-200': asset.type === 'loan', 
-                                                    'bg-blue-100 text-blue-600 border-blue-200': asset.type === 'bank', 
-                                                    'bg-purple-100 text-purple-600 border-purple-200': asset.type === 'savings', 
-                                                    'bg-green-100 text-green-600 border-green-200': asset.type === 'cash', 
-                                                    'bg-orange-100 text-orange-600 border-orange-200': asset.type === 'credit'
-                                                }" 
-                                                class="w-8 h-8 rounded-full flex items-center justify-center mr-3 border"
-                                            >
+                                            <div :class="{
+                                                'bg-red-100 text-red-600 border-red-200': asset.type === 'loan',
+                                                'bg-blue-100 text-blue-600 border-blue-200': asset.type === 'bank',
+                                                'bg-purple-100 text-purple-600 border-purple-200': asset.type === 'savings',
+                                                'bg-green-100 text-green-600 border-green-200': asset.type === 'cash',
+                                                'bg-orange-100 text-orange-600 border-orange-200': asset.type === 'credit'
+                                            }"
+                                                class="w-8 h-8 rounded-full flex items-center justify-center mr-3 border">
                                                 <i :class="getAssetIcon(asset.type)" class="text-"></i>
                                             </div>
-                                            <span class="font-medium text-gray-800">{{ asset.name }}</span>
+                                            <div class="asset-text-container">
+                                                <div class="asset-text-wrapper overflow-visible">
+                                                    <div class="asset-name"
+                                                        :class="{ 'slide-up': hoveredAsset === asset }">{{ asset.name }}
+                                                    </div>
+                                                    <div class="asset-value" :class="[
+                                                        { 'active font-bold': hoveredAsset === asset },
+                                                        { 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }
+                                                    ]">Rp {{ formatNumber(asset.balance) }}</div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span 
-                                            :class="{ 
-                                                'text-red-700': asset.type === 'loan', 
-                                                'text-blue-700': asset.type === 'bank', 
-                                                'text-purple-700': asset.type === 'savings', 
-                                                'text-green-700': asset.type === 'cash', 
-                                                'text-orange-700': asset.type === 'credit'
-                                            }" 
-                                            class="font-bold z-20"
-                                        >{{ formatPercentage(getAssetPercentage(asset)) }}%</span>
+                                        <div class="percentage-container">
+                                            <div class="percentage" :class="{ 'slide-up': hoveredAsset === asset }">
+                                                <span :class="{
+                                                    'text-red-700': asset.type === 'loan',
+                                                    'text-blue-700': asset.type === 'bank',
+                                                    'text-purple-700': asset.type === 'savings',
+                                                    'text-green-700': asset.type === 'cash',
+                                                    'text-orange-700': asset.type === 'credit'
+                                                }" class="font-bold z-20">{{
+                                                    formatPercentage(getAssetPercentage(asset)) }}%</span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <!-- Bar persentase (kanan ke kiri) -->
-                                    <div 
-                                        :class="{ 
-                                            'bg-red-500': asset.type === 'loan', 
-                                            'bg-blue-500': asset.type === 'bank', 
-                                            'bg-purple-500': asset.type === 'savings', 
-                                            'bg-green-500': asset.type === 'cash', 
-                                            'bg-orange-500': asset.type === 'credit'
-                                        }" 
-                                        class="absolute top-0 right-0 h-full opacity-20"
-                                        :style="`width: ${getAssetPercentage(asset)}%`"
-                                    ></div>
+                                    <div :class="{
+                                        'bg-red-500': asset.type === 'loan',
+                                        'bg-blue-500': asset.type === 'bank',
+                                        'bg-purple-500': asset.type === 'savings',
+                                        'bg-green-500': asset.type === 'cash',
+                                        'bg-orange-500': asset.type === 'credit'
+                                    }" class="absolute top-0 right-0 h-full opacity-20"
+                                        :style="`width: ${getAssetPercentage(asset)}%`"></div>
                                 </div>
                             </template>
                         </div>
@@ -161,12 +174,13 @@
                 <div class="mt-6">
                     <div class="card rounded-lg border border-gray-100 p-4">
                         <h3 class="text-lg font-semibold text-gray-700 mb-4 ml-1">Distribusi Pengeluaran</h3>
-                        
+
                         <!-- Placeholder ketika tidak ada data pengeluaran -->
                         <div v-if="expensePieData.length === 0" class="text-center py-8">
                             <i class="fas fa-chart-pie text-gray-300 text-5xl mb-4"></i>
                             <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Pengeluaran</h3>
-                            <p class="text-gray-500 mb-4">Tambahkan transaksi pengeluaran untuk melihat distribusinya</p>
+                            <p class="text-gray-500 mb-4">Tambahkan transaksi pengeluaran untuk melihat distribusinya
+                            </p>
                             <button @click="addTransaction"
                                 class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
                                 <i class="fas fa-plus mr-2"></i> Tambah Pengeluaran
@@ -182,14 +196,12 @@
                                         border: 1px solid ${colorPalette[index % colorPalette.length]};
                                         opacity: ${getItemOpacity(slice)};
                                         transform: ${activeSlice === slice ? 'scale(1.05)' : 'scale(1)'};
-                                    `"
-                                    @mouseenter="activeSlice = slice" 
-                                    @mouseleave="activeSlice = null"
+                                    `" @mouseenter="activeSlice = slice" @mouseleave="activeSlice = null"
                                     @click="toggleSelectedSlice(slice)">
                                     <div :style="`background-color: ${colorPalette[index % colorPalette.length]}`"
                                         class="w-2 h-2 rounded-full"></div>
                                     <span class="capitalize">{{ slice.category }} ({{ formatPercentage(slice.percentage)
-                                        }}%)</span>
+                                    }}%)</span>
                                 </div>
                             </div>
                         </div>
@@ -202,8 +214,7 @@
                                         <!-- Pie Chart Elements -->
                                         <g v-for="(slice, index) in expensePieData" :key="index">
                                             <path :d="getArcPath(slice, selectedSlice === slice)"
-                                                :fill="getSliceFill(slice, index)"
-                                                class="transition-all duration-300"
+                                                :fill="getSliceFill(slice, index)" class="transition-all duration-300"
                                                 @mouseenter="activeSlice = slice" @mouseleave="activeSlice = null"
                                                 @click="toggleSelectedSlice(slice)">
                                             </path>
@@ -220,16 +231,17 @@
                                 </svg>
                             </div>
                         </div>
-                        
+
                         <!-- New Section: Total Amount for Hovered Category -->
-                        <div 
-                            v-if="activeSlice && expensePieData.length > 0" 
+                        <div v-if="activeSlice && expensePieData.length > 0"
                             class="mt-4 bg-gray-50 rounded-lg border border-gray-200 p-4 transition-all duration-300 transform"
                             style="transform-origin: top center;">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <h4 class="text-sm text-gray-600 pb-1"><span class="font-medium capitalize">{{ capitalize(activeSlice.category) }}</span></h4>
-                                    <p class="text-xl font-bold" :style="`color: ${getColorForCategory(activeSlice.category)}`">
+                                    <h4 class="text-sm text-gray-600 pb-1"><span class="font-medium capitalize">{{
+                                            capitalize(activeSlice.category) }}</span></h4>
+                                    <p class="text-xl font-bold"
+                                        :style="`color: ${getColorForCategory(activeSlice.category)}`">
                                         Rp {{ formatNumber(activeSlice.amount) }}
                                     </p>
                                 </div>
@@ -264,6 +276,7 @@ export default {
             timeRange: 'thisMonth',
             expensePieData: [],
             activeSlice: null,
+            hoveredAsset: null,
             selectedSlice: null,
             colorPalette: [
                 '#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -285,12 +298,12 @@ export default {
                 'credit': 4,
                 'loan': 5
             };
-            
+
             // Return sorted array of assets
             return [...this.assets].sort((a, b) => {
                 const orderA = typeOrder[a.type] || 99;
                 const orderB = typeOrder[b.type] || 99;
-                
+
                 return orderA - orderB;
             });
         },
@@ -399,15 +412,15 @@ export default {
         },
         getSliceFill(slice, index) {
             const baseColor = this.colorPalette[index % this.colorPalette.length];
-            
+
             // If we have an active or selected slice, reduce saturation of other slices
-            if ((this.activeSlice || this.selectedSlice) && 
-                slice !== this.activeSlice && 
+            if ((this.activeSlice || this.selectedSlice) &&
+                slice !== this.activeSlice &&
                 slice !== this.selectedSlice) {
                 // Create a more transparent/desaturated version of the color
                 return `${baseColor}80`; // 80 is 50% opacity in hex
             }
-            
+
             return baseColor;
         },
         getArcPath(slice) {
@@ -415,13 +428,13 @@ export default {
             const radius = 170;
             // Only apply enlargement effect when hovering (activeSlice)
             const effectiveRadius = this.activeSlice === slice ? 185 : radius;
-            
+
             // Special case for single category (100%)
             if (Math.abs(slice.percentage - 100) < 0.1) {
                 // Draw a complete circle for 100%
                 return `M 0 -${effectiveRadius} A ${effectiveRadius} ${effectiveRadius} 0 1 1 0 ${effectiveRadius} A ${effectiveRadius} ${effectiveRadius} 0 1 1 0 -${effectiveRadius}`;
             }
-            
+
             let startAngle = 0;
 
             for (let i = 0; i < this.expensePieData.indexOf(slice); i++) {
@@ -449,11 +462,11 @@ export default {
             const baseColor = this.colorPalette[index % this.colorPalette.length];
             return `${baseColor}22`; // Always use light background (22 is 13% opacity in hex)
         },
-        
+
         getItemOpacity(slice) {
             // If there's an active/selected slice and this isn't it, reduce opacity
-            if ((this.activeSlice || this.selectedSlice) && 
-                slice !== this.activeSlice && 
+            if ((this.activeSlice || this.selectedSlice) &&
+                slice !== this.activeSlice &&
                 slice !== this.selectedSlice) {
                 return '0.6'; // Reduced opacity for non-active items
             }
@@ -518,5 +531,64 @@ export default {
 
 .ring-offset-1 {
     box-shadow: 0 0 0 1px white, 0 0 0 3px currentColor;
+}
+
+/* Animation for asset distribution hover */
+.asset-text-container {
+    position: relative;
+    height: 24px;
+    flex-grow: 1;
+    overflow: visible;
+    min-width: 80px;
+}
+
+.asset-text-wrapper {
+    position: relative;
+}
+
+.asset-name,
+.asset-value {
+    transition: transform 0.3s ease;
+}
+
+.asset-name.slide-up {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.asset-value {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(100%);
+    opacity: 0;
+    max-width: calc(100vw - 120px);
+}
+
+.asset-value.active {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.percentage-container {
+    margin-left: 10px;
+}
+
+.percentage-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.percentage {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.percentage.slide-up {
+    transform: translateY(-100%);
+    opacity: 0;
 }
 </style>
