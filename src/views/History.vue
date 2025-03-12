@@ -159,7 +159,7 @@
                             </div>
                         </div>
                         <div class="flex justify-end">
-                            <p class="text-xs text-gray-400 mt-2">{{ formatDateSimple(transaction.date) }}</p>
+                            <p class="text-xs text-gray-400">{{ formatDateSimple(transaction.date) }}</p>
                         </div>
                     </div>
                     <div class="action-sticks-container">
@@ -1002,11 +1002,11 @@ i.fas.fa-history.text-gray-100 {
 
 .transaction-card-wrapper {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .transaction-card-wrapper:last-child {
-    margin-bottom: 40px;
+    margin-bottom: 10px;
 }
 
 .action-sticks-container {

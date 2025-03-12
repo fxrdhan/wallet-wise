@@ -110,7 +110,7 @@
                         <h4 class="text-lg font-semibold text-gray-700 mb-4">Distribusi berdasarkan Aset</h4>
                         <div class="space-y-3">
                             <template v-for="asset in sortedAssets" :key="asset.id">
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center flex-wrap">
                                     <div class="flex items-center">
                                         <div :class="{ 'bg-red-100': asset.type === 'loan', 'bg-blue-100': asset.type === 'bank', 'bg-purple-100': asset.type === 'savings', 'bg-green-100': asset.type === 'cash', 'bg-orange-100': asset.type === 'credit' }" 
                                             class="w-8 h-8 rounded-full flex items-center justify-center mr-3">
@@ -120,13 +120,13 @@
                                                 { 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }
                                             ]"></i>
                                         </div>
-                                        <span>{{ asset.name }}</span>
+                                        <span class="min-w-[60px]">{{ asset.name }}</span>
                                     </div>
-                                    <div class="flex items-center">
-                                        <div class="mr-4">
-                                            <span :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }" class="font-medium">{{ formatPercentage(getAssetPercentage(asset)) }}%</span>
+                                    <div class="flex items-center ml-auto">
+                                        <div class="mr-2 sm:mr-4 min-w-[40px] text-right">
+                                            <span :class="{ 'text-red-600': asset.type === 'loan', 'text-blue-600': asset.type === 'bank', 'text-purple-600': asset.type === 'savings', 'text-green-600': asset.type === 'cash', 'text-orange-600': asset.type === 'credit' }" class="font-medium text-sm sm:text-base">{{ formatPercentage(getAssetPercentage(asset)) }}%</span>
                                         </div>
-                                        <div class="w-24 bg-gray-200 rounded-full h-2 overflow-hidden">
+                                        <div class="w-14 sm:w-24 bg-gray-200 rounded-full h-3 overflow-hidden">
                                             <div :class="{ 'bg-red-500': asset.type === 'loan', 'bg-blue-500': asset.type === 'bank', 'bg-purple-500': asset.type === 'savings', 'bg-green-500': asset.type === 'cash', 'bg-orange-500': asset.type === 'credit' }" class="h-full" :style="`width: ${getAssetPercentage(asset)}%`"></div>
                                         </div>
                                     </div>
