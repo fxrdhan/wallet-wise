@@ -443,14 +443,36 @@ export default {
             this.showAssetDropdown = false;
         },
         selectSourceAsset(value) {
+            // Cek apakah sama dengan targetAssetId
+            if (value === this.form.targetAssetId) {
+                // Cek apakah keduanya adalah bank
+                const sourceAsset = this.assets.find(asset => asset.id === value);
+                const targetAsset = this.assets.find(asset => asset.id === this.form.targetAssetId);
+                
+                // Jika bukan keduanya bank, tolak pemilihan
+                if (!(sourceAsset?.type === 'bank' && targetAsset?.type === 'bank')) {
+                    return; // Aset sudah dipilih sebagai target dan bukan transfer antar bank
+                }
+            }
+            
             this.form.sourceAssetId = value;
             this.showSourceAssetDropdown = false;
         },
         selectTargetAsset(value) {
-            if (value !== this.form.sourceAssetId) {
-                this.form.targetAssetId = value;
-                this.showTargetAssetDropdown = false;
+            // Cek apakah sama dengan sourceAssetId
+            if (value === this.form.sourceAssetId) {
+                // Cek apakah keduanya adalah bank
+                const sourceAsset = this.assets.find(asset => asset.id === this.form.sourceAssetId);
+                const targetAsset = this.assets.find(asset => asset.id === value);
+                
+                // Jika bukan keduanya bank, tolak pemilihan
+                if (!(sourceAsset?.type === 'bank' && targetAsset?.type === 'bank')) {
+                    return; // Aset sudah dipilih sebagai source dan bukan transfer antar bank
+                }
             }
+            
+            this.form.targetAssetId = value;
+            this.showTargetAssetDropdown = false;
         }
     }
 }
