@@ -147,19 +147,20 @@
                                     </span>
                                     <span v-else><i
                                             :class="getAssetIcon(getAssetType(transaction.sourceAssetId)) + ' mr-1'"></i>{{
-                                                getAssetName(transaction.sourceAssetId) }}
+                                            getAssetName(transaction.sourceAssetId) }}
                                         → <i
                                             :class="getAssetIcon(getAssetType(transaction.targetAssetId)) + ' mr-1'"></i>{{
-                                                getAssetName(transaction.targetAssetId) }}</span>
+                                            getAssetName(transaction.targetAssetId) }}</span>
                                 </p>
                             </div>
-                            <div :class="getAmountColorClass(transaction.type)" class="font-bold text-right">
-                                {{ getAmountPrefix(transaction.type) }} Rp {{
-                                    formatNumber(getTransactionTotal(transaction)) }}
+                            <div class="text-right">
+                                <div :class="getAmountColorClass(transaction.type)" class="font-bold mb-2">
+                                    {{ getAmountPrefix(transaction.type) }} Rp {{
+                                        formatNumber(getTransactionTotal(transaction)) }}
+                                </div>
+                                <div class="h-4"></div>
+                                <p class="text-xs text-gray-400">{{ formatDateSimple(transaction.date) }}</p>
                             </div>
-                        </div>
-                        <div class="flex justify-end">
-                            <p class="text-xs text-gray-400">{{ formatDateSimple(transaction.date) }}</p>
                         </div>
                     </div>
                     <div class="action-sticks-container">
