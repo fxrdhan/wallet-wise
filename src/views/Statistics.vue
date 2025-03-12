@@ -348,7 +348,16 @@ export default {
             return this.filteredTransactions.length > 0;
         },
         totalExpense() {
-            return this.expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
+            // Hitung total pengeluaran dari transaksi expense
+            const expenseAmount = this.expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
+            
+            // Tambahkan biaya admin dari transaksi transfer
+            const adminFees = this.filteredTransactions
+                .filter(t => t.type === 'transfer')
+                .reduce((sum, t) => sum + (t.adminFee || 0), 0);
+            
+            // Kembalikan total
+            return expenseAmount + adminFees;
         },
         totalIncome() {
             return this.incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
@@ -400,15 +409,35 @@ export default {
             if (!this.hasTransactions) return;
 
             const groupedExpenses = this.groupByCategory(this.expenseTransactions);
-            const totalExpense = this.totalExpense;
-
-            this.expensePieData = Object.entries(groupedExpenses)
-                .map(([category, transactions]) => {
-                    const amount = transactions.reduce((sum, t) => sum + t.amount, 0);
-                    const percentage = (amount / totalExpense) * 100;
-                    return { category, amount, percentage };
-                })
-                .sort((a, b) => b.amount - a.amount)
+            
+            // Hitung biaya admin dari transfer
+            const adminFees = this.filteredTransactions
+                .filter(t => t.type === 'transfer')
+                .reduce((sum, t) => sum + (t.adminFee || 0), 0);
+            
+            // Buat array data untuk pie chart
+            let expenseData = [];
+            
+            // Tambahkan data pengeluaran berdasarkan kategori
+            for (const [category, transactions] of Object.entries(groupedExpenses)) {
+                const amount = transactions.reduce((sum, t) => sum + t.amount, 0);
+                expenseData.push({ category, amount });
+            }
+            
+            // Tambahkan biaya admin sebagai kategori terpisah jika ada
+            if (adminFees > 0) {
+                expenseData.push({ category: 'biaya admin', amount: adminFees });
+            }
+            
+            // Hitung persentase berdasarkan total (termasuk biaya admin)
+            const total = this.totalExpense;
+            
+            this.expensePieData = expenseData
+                .map(item => ({
+                    ...item,
+                    percentage: (item.amount / total) * 100
+                }))
+                .sort((a, b) => b.amount - a.amount);
         },
         getSliceFill(slice, index) {
             const baseColor = this.colorPalette[index % this.colorPalette.length];
