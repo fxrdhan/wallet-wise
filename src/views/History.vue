@@ -3,9 +3,9 @@
     <div class="transaction-history">
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
             <!-- Original Header (sekarang hanya ditampilkan di mode normal) -->
-            <div v-if="!selectionMode" class="flex items-center justify-between mb-6 relative z-10">
+            <div v-if="!selectionMode" class="flex items-center justify-between mb-6 flex space-x-3 justify-end relative z-20relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800 flex-shrink-0">{{ filterTitle }}</h2>
-                <div class="flex space-x-3 mt-2 sm:mt-0 justify-end relative z-20">
+                <div class="flex space-x-1 mt-1 sm:mt-0 justify-end relative z-20">
                     <DropdownMenu class="icon-only-dropdown">
                         <template #button-content>
                             <i class="fas fa-filter relative z-20"></i>
@@ -151,7 +151,7 @@
             </div>
 
             <!-- Mobile view: Card list -->
-            <div class="md:hidden space-y-4 relative z-5">
+            <div class="md:hidden space-y-2 relative z-5">
                 <div v-if="transactions.length === 0"
                     class="bg-white rounded-xl shadow-md p-6 card-hover transition-all text-center">
                     <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
@@ -178,7 +178,7 @@
                         :class="{ 'pl-10': selectionMode }">
                         <div class="flex justify-between items-start">
                             <div class="flex-1 mr-4">
-                                <h3 class="font-medium text-gray-900">{{ transaction.description }}</h3>
+                                <h3 class="text-base font-medium text-gray-900">{{ transaction.description }}</h3>
                                 <p class="text-sm text-gray-500 capitalize">{{ getTransactionDetails(transaction) }}</p>
                                 <p class="text-xs text-gray-400 mt-1">
                                     <span v-if="transaction.type !== 'transfer'">
@@ -1090,7 +1090,7 @@ export default {
 <style scoped>
 /* Styling untuk mode seleksi */
 .selected-card {
-    border: 2px solid #3b82f6 !important;
+    /* border: 2px solid #3b82f6 !important; */
     transform: scale(0.98);
     transition: all 0.2s ease;
     position: relative;
@@ -1103,9 +1103,9 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(59, 130, 246, 0.05);
+    background-color: rgba(59, 131, 246, 0.307);
     z-index: 5;
-    border-radius: 8px;
+    border-radius: 8px 8px 0 0;
     pointer-events: none;
 }
 
@@ -1212,7 +1212,6 @@ i.fas.fa-history.text-gray-100 {
     height: 5px;
     width: 40px;
     cursor: pointer;
-    transition: all 0.2s ease;
     border-radius: 0 0 20px 20px;
     pointer-events: auto !important;
     opacity: 0.8;
@@ -1220,7 +1219,7 @@ i.fas.fa-history.text-gray-100 {
 }
 
 .action-stick:hover {
-    transform: scaleX(1.1);
+    /* transform: scaleX(1.1); */
     opacity: 1;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }

@@ -14,8 +14,8 @@
             <div class="flex md:hidden w-full justify-between items-center">
                 <!-- Left: User Profile & Greeting -->
                 <div class="flex items-center">
-                    <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center mr-2">
-                        <i class="fas fa-user text-gray-500"></i>
+                    <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center mr-2 overflow-hidden">
+                        <img :src="profileImage" alt="User Profile" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <p class="text-xs text-gray-600">{{ greeting }}</p>
@@ -35,7 +35,8 @@ export default {
     name: "AppNavbar",
     data() {
         return {
-            currentDate: ""
+            currentDate: "",
+            profileImage: require("../assets/pp.jpeg") // Local profile image from assets folder
         }
     },
     computed: {

@@ -2,7 +2,7 @@
 <template>
     <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden mt-6">
         <div class="flex items-center justify-between mb-6 relative z-10">
-            <h2 class="text-lg font-semibold text-gray-800">TIme Series</h2>
+            <h2 class="text-lg font-semibold text-gray-800">Time Series</h2>
             <div class="flex space-x-2">
                 <!-- Date range picker -->
                 <div class="flex items-center space-x-2 text-sm">
