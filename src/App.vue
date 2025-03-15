@@ -40,44 +40,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-/* Card styles */
-.card-balance {
-  background: linear-gradient(135deg, #f8b195 0%, #f67280 100%);
-  color: white;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
-.card-income {
-  background: linear-gradient(135deg, #c06c84 0%, #6c5b7b 100%);
-  color: white;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
-.card-expense {
-  background: linear-gradient(135deg, #355c7d 0%, #6c5b7b 100%);
-  color: white;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
-.card-icon {
-  position: absolute;
-  bottom: -20px;
-  right: -20px;
-  font-size: 120px;
-  opacity: 0.15;
-  z-index: -1;
-}
-.asset-icon {
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Navbar styles */
 .navbar-bottom {
   position: fixed;

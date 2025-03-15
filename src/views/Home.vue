@@ -3,58 +3,61 @@
     <div>
         <!-- Dashboard Cards - Responsive Layout -->
         <section class="mb-6">
-            <!-- Card Saldo -->
-            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-5 card-hover transition-all mb-4 border-l-4 border-green-500">
-                <div class="flex justify-between items-center h-full">
+            <!-- Card Saldo - Updated with gradient background -->
+            <div class="bg-gradient-to-r from-green-500/90 to-green-600/80 rounded-xl shadow-sm p-4 sm:p-5 card-hover transition-all mb-4 relative overflow-hidden">
+                <div class="flex justify-between items-center h-full relative z-10">
                     <div class="flex-1">
-                        <h2 class="text-base sm:text-lg font-semibold text-gray-700">Saldo Saat Ini</h2>
-                        <p class="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 text-green-600">Rp {{ formatNumber(totalBalance) }}</p>
-                        <p class="text-xs sm:text-sm text-gray-500 mt-1" v-if="isClient">Update terakhir: {{ lastUpdate }}</p>
+                        <h2 class="text-base sm:text-lg font-semibold text-white">Saldo Saat Ini</h2>
+                        <p class="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 text-white">Rp {{ formatNumber(totalBalance) }}</p>
+                        <p class="text-xs sm:text-sm text-green-100 mt-1" v-if="isClient">Update terakhir: {{ lastUpdate }}</p>
                     </div>
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 ml-3">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center flex-shrink-0 ml-3 relative z-10">
                         <i class="fas fa-wallet text-green-500 text-lg sm:text-xl"></i>
                     </div>
                 </div>
+                <i class="fas fa-wallet text-green-400/20 absolute -bottom-2 -right-2 text-8xl"></i>
             </div>
 
             <!-- Income and Expense Cards -->
             <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                <!-- Card Pemasukan -->
-                <div class="bg-white rounded-xl shadow-sm p-3 sm:p-5 card-hover transition-all border-l-4 border-blue-500 h-full">
-                    <div class="flex flex-col h-full">
+                <!-- Card Pemasukan - Updated with gradient background -->
+                <div class="bg-gradient-to-r from-blue-500/90 to-blue-600/80 rounded-xl shadow-sm p-3 sm:p-5 card-hover transition-all h-full relative overflow-hidden">
+                    <div class="flex flex-col h-full relative z-10">
                         <div class="flex justify-between items-start mb-auto">
-                            <h2 class="text-sm sm:text-base font-semibold text-gray-700">Pemasukan</h2>
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 ml-1">
-                                <i class="fas fa-arrow-down text-blue-500 text-xs sm:text-sm"></i>
+                            <h2 class="text-sm sm:text-base font-semibold text-white">Pemasukan</h2>
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0 ml-1">
+                                <i class="fas fa-arrow-down text-white text-xs sm:text-sm"></i>
                             </div>
                         </div>
                         <div class="mt-1 sm:mt-2">
-                            <p class="text-xl sm:text-2xl font-bold text-blue-600">Rp {{ formatNumber(income) }}</p>
-                            <div class="flex items-center mt-1 text-xs sm:text-sm text-gray-500">
+                            <p class="text-xl sm:text-2xl font-bold text-white">Rp {{ formatNumber(income) }}</p>
+                            <div class="flex items-center mt-1 text-xs sm:text-sm text-blue-100">
                                 <i class="fas fa-chart-line mr-1 text-xs"></i>
                                 <span>{{ changePercentage }}% dari bulan lalu</span>
                             </div>
                         </div>
                     </div>
+                    <i class="fas fa-arrow-down text-blue-400/20 absolute -bottom-2 -right-2 text-8xl"></i>
                 </div>
 
-                <!-- Card Pengeluaran -->
-                <div class="bg-white rounded-xl shadow-sm p-3 sm:p-5 card-hover transition-all border-l-4 border-red-500 h-full">
-                    <div class="flex flex-col h-full">
+                <!-- Card Pengeluaran - Updated with gradient background -->
+                <div class="bg-gradient-to-r from-red-500/90 to-red-600/80 rounded-xl shadow-sm p-3 sm:p-5 card-hover transition-all h-full relative overflow-hidden">
+                    <div class="flex flex-col h-full relative z-10">
                         <div class="flex justify-between items-start mb-auto">
-                            <h2 class="text-sm sm:text-base font-semibold text-gray-700">Pengeluaran</h2>
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 ml-1">
-                                <i class="fas fa-arrow-up text-red-500 text-xs sm:text-sm"></i>
+                            <h2 class="text-sm sm:text-base font-semibold text-white">Pengeluaran</h2>
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0 ml-1">
+                                <i class="fas fa-arrow-up text-white text-xs sm:text-sm"></i>
                             </div>
                         </div>
                         <div class="mt-1 sm:mt-2">
-                            <p class="text-xl sm:text-2xl font-bold text-red-600">Rp {{ formatNumber(expense) }}</p>
-                            <div class="flex items-center mt-1 text-xs sm:text-sm text-gray-500">
+                            <p class="text-xl sm:text-2xl font-bold text-white">Rp {{ formatNumber(expense) }}</p>
+                            <div class="flex items-center mt-1 text-xs sm:text-sm text-red-100">
                                 <i class="fas fa-chart-line mr-1 text-xs"></i>
                                 <span>{{ changePercentage }}% dari bulan lalu</span>
                             </div>
                         </div>
                     </div>
+                    <i class="fas fa-arrow-up text-red-400/20 absolute -bottom-2 -right-2 text-8xl"></i>
                 </div>
             </div>
         </section>
