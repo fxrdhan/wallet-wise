@@ -1,16 +1,30 @@
 <!-- src/components/Header.vue -->
 <template>
-    <header class="mb-4 pt-4 transition-all overflow-hidden">
-        <div class="p-4 flex flex-col md:flex-row justify-between items-center">
-            <div>
-                <div class="flex pl-4 items-center">
-                    <i class="fas fa-wallet text-green-600 text-3xl mr-3"></i>
+    <header class="mb-4 transition-all overflow-hidden">
+        <div class="px-1 py-2 flex justify-between items-center">
+            <!-- Desktop Version -->
+            <div class="hidden md:block">
+                <div class="flex items-center">
                     <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">Wallet Wise</h1>
                 </div>
-                <p class="text-gray-400 mt-1 text-sm ml-4">Aplikasi kelola keuangan Anda</p>
+                <p class="text-gray-400 mt-1 text-sm">Aplikasi kelola keuangan Anda</p>
             </div>
-            <div class="mt-4 md:mt-0 bg-green-50 px-4 py-2 rounded-lg border border-green-100">
-                <p class="text-green-700 text-sm"><i class="far fa-calendar-alt mr-1"></i> <span>{{ currentDate }}</span></p>
+            
+            <!-- Mobile Version -->
+            <div class="flex md:hidden w-full justify-between items-center">
+                <!-- Left: User Profile & Greeting -->
+                <div class="flex items-center">
+                    <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                        <i class="fas fa-user text-gray-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-600">{{ greeting }}</p>
+                        <p class="font-medium text-sm">Andriana</p>
+                    </div>
+                </div>
+                
+                <!-- Right: Title only -->
+                <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">Wallet Wise</h1>
             </div>
         </div>
     </header>
@@ -24,9 +38,20 @@ export default {
             currentDate: ""
         }
     },
-    mounted() {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        this.currentDate = new Date().toLocaleDateString('id-ID', options);
-    }
+    computed: {
+        greeting() {
+            const hours = new Date().getHours();
+            if (hours >= 5 && hours < 12) {
+                return "Selamat pagi,";
+            } else if (hours >= 12 && hours < 15) {
+                return "Selamat siang,";
+            } else if (hours >= 15 && hours < 19) {
+                return "Selamat sore,";
+            } else {
+                return "Selamat malam,";
+            }
+        }
+    },
+    mounted() {}
 }
 </script>
