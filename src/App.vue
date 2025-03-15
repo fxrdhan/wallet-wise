@@ -1,12 +1,17 @@
 <template>
-  <div class="container mx-auto p-4 pb-24 bg-gray-50 min-h-screen font-sans">
-    <AppHeader />
-    <main>
-      <router-view />
-    </main>
-    <AppFooter />
-    <AppNavbar />
-    <TransactionModal />
+  <div class="app-container">
+    <!-- Peringatan untuk tampilan desktop (≥ 768px) -->
+    <DesktopWarning v-if="isDesktop" />
+    <!-- Konten aplikasi hanya ditampilkan pada tampilan mobile -->
+    <div v-show="!isDesktop" class="container mx-auto p-4 pb-24 bg-gray-50 min-h-screen font-sans">
+      <AppHeader />
+      <main>
+        <router-view />
+      </main>
+      <AppFooter />
+      <AppNavbar />
+      <TransactionModal />
+    </div>
   </div>
 </template>
 
@@ -15,6 +20,7 @@ import AppHeader from './components/Header.vue'
 import AppFooter from './components/Footer.vue'
 import AppNavbar from './components/Navbar.vue'
 import TransactionModal from './components/TransactionModal.vue'
+import DesktopWarning from './components/DesktopWarning.vue'
 
 export default {
   name: 'App',
@@ -22,10 +28,28 @@ export default {
     AppHeader,
     AppFooter,
     AppNavbar,
-    TransactionModal
+    TransactionModal,
+    DesktopWarning
+  },
+  data() {
+    return {
+      isDesktop: false,
+      screenWidth: window.innerWidth
+    }
   },
   mounted() {
     this.$store.dispatch('initializeStore');
+    this.checkScreenSize();
+    window.addEventListener('resize', this.checkScreenSize);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkScreenSize);
+  },
+  methods: {
+    checkScreenSize() {
+      this.screenWidth = window.innerWidth;
+      this.isDesktop = this.screenWidth >= 768; // 768px adalah breakpoint untuk md: di Tailwind
+    }
   }
 }
 </script>
