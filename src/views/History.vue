@@ -2,7 +2,8 @@
 <template>
     <div class="transaction-history">
         <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
-            <div class="flex items-center justify-between mb-6 relative z-10">
+            <!-- Original Header (sekarang hanya ditampilkan di mode normal) -->
+            <div v-if="!selectionMode" class="flex items-center justify-between mb-6 relative z-10">
                 <h2 class="text-xl font-semibold text-gray-800 flex-shrink-0">{{ filterTitle }}</h2>
                 <div class="flex space-x-3 mt-2 sm:mt-0 justify-end relative z-20">
                     <DropdownMenu class="icon-only-dropdown">
@@ -47,6 +48,24 @@
                 </div>
             </div>
 
+            <!-- Tambahkan bar seleksi saat mode seleksi aktif -->
+            <div v-else class="flex items-center justify-between mb-6 relative z-10 bg-gray-100 -mx-6 -mt-6 px-6 py-3 shadow-sm">
+                <div class="flex items-center">
+                    <button @click="exitSelectionMode" class="mr-4 text-gray-600"><i class="fas fa-times"></i></button>
+                    <h2 class="text-lg font-medium text-gray-800">{{ selectedTransactions.length }} dipilih</h2>
+                </div>
+                <div class="flex space-x-3">
+                    <button @click="selectAllTransactions" class="text-blue-600 hover:text-blue-800 px-2 py-1 rounded">
+                        {{ allTransactionsSelected ? 'Batal Pilih' : 'Pilih Semua' }}
+                    </button>
+                    <button @click="confirmDeleteSelected" 
+                            class="text-red-600 hover:text-red-800 px-2 py-1 rounded"
+                            :disabled="selectedTransactions.length === 0">
+                        <i class="fas fa-trash-alt mr-1"></i> Hapus
+                    </button>
+                </div>
+            </div>
+
             <!-- Desktop view: Table (changed z-index from 10 to 5) -->
             <div class="overflow-x-auto rounded-lg border border-gray-200 relative z-5 hidden md:block">
                 <table class="w-full divide-y divide-gray-200">
@@ -82,7 +101,16 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50">
+                        <tr v-for="transaction in transactions" 
+                            :key="transaction.id" 
+                            class="hover:bg-gray-50"
+                            :class="{ 'bg-blue-50': selectionMode && selectedTransactions.includes(transaction.id) }"
+                            @click="selectionMode ? toggleTransactionSelection(transaction) : null"
+                            v-long-press="() => handleLongPress(transaction)">
+                            <!-- Tambahkan kolom checkbox saat mode seleksi aktif -->
+                            <td v-if="selectionMode" class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" :checked="selectedTransactions.includes(transaction.id)" class="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded">
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
                                 formatDateSimple(transaction.date) }}
                             </td>
@@ -134,8 +162,20 @@
                         <i class="fas fa-plus mr-2"></i> Tambah Transaksi
                     </button>
                 </div>
-                <div v-for="transaction in transactions" :key="transaction.id" class="transaction-card-wrapper mb-6">
-                    <div class="bg-white rounded-t-lg border border-gray-200 shadow-sm p-4 relative overflow-hidden">
+                <div v-for="transaction in transactions" 
+                    :key="transaction.id" 
+                    class="transaction-card-wrapper mb-6"
+                    :class="{ 'selected-card': selectionMode && selectedTransactions.includes(transaction.id) }"
+                    v-long-press="() => handleLongPress(transaction)"
+                    @click="selectionMode ? toggleTransactionSelection(transaction) : null">
+                    
+                    <!-- Checkbox seleksi -->
+                    <div v-if="selectionMode" class="absolute top-2 left-2 z-20">
+                        <input type="checkbox" :checked="selectedTransactions.includes(transaction.id)" class="h-5 w-5 text-blue-600 focus:ring-blue-500 rounded">
+                    </div>
+                    
+                    <div class="bg-white rounded-t-lg border border-gray-200 shadow-sm p-4 relative overflow-hidden"
+                        :class="{ 'pl-10': selectionMode }">
                         <div class="flex justify-between items-start">
                             <div class="flex-1 mr-4">
                                 <h3 class="font-medium text-gray-900">{{ transaction.description }}</h3>
@@ -163,7 +203,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="action-sticks-container">
+                    <div class="action-sticks-container" v-if="!selectionMode">
                         <!-- Tombol Edit (Stick Oranye di Kiri) -->
                         <div @click="editTransaction(transaction.id)" class="action-stick edit-stick"></div>
                         <!-- Tombol Hapus (Stick Merah di Kanan) -->
@@ -189,8 +229,8 @@
     <!-- Hidden file input for CSV import -->
     <input type="file" ref="fileInput" accept=".csv" style="display: none" @change="handleFileSelected" />
 
-    <!-- Confirmation Dialog - pindahkan ke luar komponen utama -->
-    <div id="deleteConfirmationModal" class="modal" :style="{ display: showDeleteConfirmation ? 'block' : 'none' }"
+    <!-- Single Delete Confirmation Dialog -->
+    <div id="deleteConfirmationModal" class="modal" :style="{ display: showDeleteConfirmation && !isMultiDelete ? 'block' : 'none' }"
         @click.self="cancelDelete">
         <div class="modal-content p-6">
             <button @click="cancelDelete" class="close-modal text-gray-500 hover:text-gray-800">
@@ -221,6 +261,39 @@
                 <button @click="confirmDelete"
                     class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-medium flex items-center">
                     <i class="fas fa-trash-alt mr-2"></i> Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multiple Delete Confirmation Dialog -->
+    <div id="multiDeleteConfirmationModal" class="modal" :style="{ display: showDeleteConfirmation && isMultiDelete ? 'block' : 'none' }"
+        @click.self="cancelDelete">
+        <div class="modal-content p-6">
+            <button @click="cancelDelete" class="close-modal text-gray-500 hover:text-gray-800">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="text-center mb-4">
+                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-trash-alt text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800">Konfirmasi Penghapusan</h3>
+                <p class="text-gray-600 mt-2">Apakah Anda yakin ingin menghapus {{ selectedTransactions.length }} transaksi yang dipilih?</p>
+                <div class="bg-gray-50 p-3 rounded-lg mt-3 text-left">
+                    <p class="font-medium text-center">
+                        {{ selectedTransactions.length }} transaksi akan dihapus secara permanen
+                    </p>
+                </div>
+            </div>
+            <div class="flex space-x-3 justify-center">
+                <button @click="cancelDelete"
+                    class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-gray-800 font-medium">
+                    Batal
+                </button>
+                <button @click="deleteSelectedTransactions"
+                    class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-medium flex items-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Ya, Hapus Semua
                 </button>
             </div>
         </div>
@@ -272,11 +345,47 @@
 import { MenuItem } from '@headlessui/vue'
 import DropdownMenu from '../components/DropdownMenu.vue'
 
+const longPress = {
+    beforeMount(el, binding) {
+        let pressTimer = null;
+        const start = (e) => {
+            if (e.type === 'click' && e.button !== 0) {
+                return;
+            }
+            
+            if (pressTimer === null) {
+                pressTimer = setTimeout(() => {
+                    binding.value();
+                }, 500); // untuk long press
+            }
+        };
+        const cancel = () => {
+            if (pressTimer !== null) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+        };
+        
+        // Event listeners
+        el.addEventListener('mousedown', start);
+        el.addEventListener('touchstart', start);
+        el.addEventListener('click', cancel);
+        el.addEventListener('mouseout', cancel);
+        el.addEventListener('touchend', cancel);
+        el.addEventListener('touchcancel', cancel);
+    }
+};
+
 export default {
     name: 'TransactionHistory',
     components: { MenuItem, DropdownMenu },
+    directives: {
+        longPress
+    },
     data() {
         return {
+            selectionMode: false,
+            selectedTransactions: [],
             filterType: 'all',
             showDeleteConfirmation: false,
             deleteTransactionId: null,
@@ -300,6 +409,12 @@ export default {
         }
     },
     computed: {
+        allTransactionsSelected() {
+            return this.selectedTransactions.length === this.transactions.length && this.transactions.length > 0;
+        },
+        isMultiDelete() {
+            return this.selectedTransactions.length > 1;
+        },
         filterTitle() {
             if (this.filterType === 'all') {
                 return 'Semua Riwayat';
@@ -380,6 +495,54 @@ export default {
         },
         addTransaction() {
             this.$store.dispatch('showModal');
+        },
+        // Metode untuk mengelola seleksi transaksi
+        handleLongPress(transaction) {
+            if (!this.selectionMode) {
+                this.selectionMode = true;
+                this.selectedTransactions = [transaction.id];
+                
+                // Tambahkan efek haptic feedback jika tersedia (pada perangkat mobile)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            }
+        },
+        toggleTransactionSelection(transaction) {
+            if (this.selectionMode) {
+                const index = this.selectedTransactions.indexOf(transaction.id);
+                if (index === -1) {
+                    this.selectedTransactions.push(transaction.id);
+                } else {
+                    this.selectedTransactions.splice(index, 1);
+                }
+                
+                // Jika tidak ada transaksi yang dipilih, keluar dari mode seleksi
+                if (this.selectedTransactions.length === 0) {
+                    this.exitSelectionMode();
+                }
+            }
+        },
+        selectAllTransactions() {
+            if (this.allTransactionsSelected) {
+                this.selectedTransactions = [];
+            } else {
+                this.selectedTransactions = this.transactions.map(t => t.id);
+            }
+        },
+        exitSelectionMode() {
+            this.selectionMode = false;
+            this.selectedTransactions = [];
+        },
+        confirmDeleteSelected() {
+            this.showDeleteConfirmation = true;
+        },
+        deleteSelectedTransactions() {
+            this.selectedTransactions.forEach(id => {
+                this.$store.dispatch('deleteTransaction', id);
+            });
+            this.cancelDelete();
+            this.exitSelectionMode();
         },
         editTransaction(id) {
             this.$store.dispatch('showModal', id);
@@ -925,6 +1088,31 @@ export default {
 </script>
 
 <style scoped>
+/* Styling untuk mode seleksi */
+.selected-card {
+    border: 2px solid #3b82f6 !important;
+    transform: scale(0.98);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.selected-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(59, 130, 246, 0.05);
+    z-index: 5;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.selected-card .action-sticks-container {
+    display: none;
+}
+
 /* Responsive adjustments */
 .transaction-history {
     padding-bottom: 40px;
