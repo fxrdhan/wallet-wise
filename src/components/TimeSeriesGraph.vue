@@ -280,7 +280,7 @@ export default {
             });
 
             // Add 10% padding to max value
-            maxValue = maxValue * 1.1;
+            maxValue = maxValue * 1;
 
             // Scale functions
             const xScale = (index) => {
@@ -324,7 +324,7 @@ export default {
                 svg.appendChild(gridLine);
 
                 // Y-axis labels
-                const value = Math.round((maxValue / numGridLines) * (numGridLines - i));
+                const value = Math.round((maxValue / numGridLines) * i);
                 const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 label.setAttribute('x', padding.left - 10);
                 label.setAttribute('y', y + 5);
@@ -337,10 +337,10 @@ export default {
 
             // Menghitung lebar bar (satu bar untuk income dan expense)
             const barWidth = Math.min(50, (width - padding.left - padding.right) / Math.max(1, this.graphData.length) * 0.7);
-            
+
             // Offset untuk memisahkan bar dari sumbu y
             const leftOffset = 15;
-            
+
             // Periksa jika graphData ada dan tidak kosong
             if (!this.graphData || this.graphData.length === 0) return;
 
@@ -361,11 +361,11 @@ export default {
                 // Expense bar (render first)
                 if ((this.activeDataType === 'expense' || this.activeDataType === 'both') && item.expense > 0) {
                     const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    bar.setAttribute('x', xScale(index) - barWidth/2 + leftOffset);
+                    bar.setAttribute('x', xScale(index) - barWidth / 2 + leftOffset);
                     bar.setAttribute('y', yScale(item.expense));
                     bar.setAttribute('width', barWidth);
                     bar.setAttribute('height', height - padding.bottom - yScale(item.expense));
-                    bar.setAttribute('fill', 'rgba(239, 68, 68, 0.7)'); // Semi-transparent Red
+                    bar.setAttribute('fill', 'rgba(239, 68, 68, 0.8)'); // Semi-transparent Red
                     bar.setAttribute('rx', '2');
                     bar.setAttribute('ry', '2');
 
@@ -379,11 +379,11 @@ export default {
                 // Income bar (render last to appear on top)
                 if ((this.activeDataType === 'income' || this.activeDataType === 'both') && item.income > 0) {
                     const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    bar.setAttribute('x', xScale(index) - barWidth/2 + leftOffset);
+                    bar.setAttribute('x', xScale(index) - barWidth / 2 + leftOffset);
                     bar.setAttribute('y', yScale(item.income));
                     bar.setAttribute('width', barWidth);
                     bar.setAttribute('height', height - padding.bottom - yScale(item.income));
-                    bar.setAttribute('fill', 'rgba(16, 185, 129, 0.7)'); // Semi-transparent Green
+                    bar.setAttribute('fill', 'rgba(16, 185, 129, 0.8)'); // Semi-transparent Green
                     bar.setAttribute('rx', '2');
                     bar.setAttribute('ry', '2');
 
