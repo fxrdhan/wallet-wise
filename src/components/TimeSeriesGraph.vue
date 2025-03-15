@@ -2,7 +2,7 @@
 <template>
     <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden mt-6">
         <div class="flex items-center justify-between mb-6 relative z-10">
-            <h2 class="text-lg font-semibold text-gray-800">Grafik Transaksi</h2>
+            <h2 class="text-lg font-semibold text-gray-800">TIme Series</h2>
             <div class="flex space-x-2">
                 <!-- Date range picker -->
                 <div class="flex items-center space-x-2 text-sm">
@@ -139,7 +139,7 @@ export default {
             const endDateObj = new Date(this.endDate);
 
             const formatDate = (date) => {
-                return `${date.getDate()} ${this.getMonthName(date.getMonth())} ${date.getFullYear()}`;
+                return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
             };
 
             return `${formatDate(startDateObj)} - ${formatDate(endDateObj)}`;
@@ -150,11 +150,6 @@ export default {
             const date = new Date();
             date.setDate(date.getDate() - days);
             return date.toISOString().substr(0, 10);
-        },
-        getMonthName(month) {
-            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            return months[month];
         },
         setDateRange(range) {
             const today = new Date();
@@ -420,7 +415,7 @@ export default {
             tooltip.className = 'absolute z-50 bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-sm';
 
             const date = new Date(item.date);
-            const formattedDate = `${date.getDate()} ${this.getMonthName(date.getMonth())} ${date.getFullYear()}`;
+            const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
             tooltip.innerHTML = `
           <div class="font-medium">${formattedDate}</div>
