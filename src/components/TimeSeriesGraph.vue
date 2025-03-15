@@ -270,17 +270,24 @@ export default {
             let maxValue = 0;
             this.graphData.forEach(item => {
                 let dayTotal = 0;
-                if (this.activeDataType === 'income' || this.activeDataType === 'both') {
-                    dayTotal += item.income;
-                }
-                if (this.activeDataType === 'expense' || this.activeDataType === 'both') {
-                    dayTotal += item.expense;
+                // Jika menampilkan keduanya, cari nilai terbesar antara income atau expense
+                // bukan jumlahkan keduanya
+                if (this.activeDataType === 'both') {
+                    dayTotal = Math.max(item.income, item.expense);
+                } else {
+                    // Jika hanya menampilkan income atau expense
+                    if (this.activeDataType === 'income') {
+                        dayTotal = item.income;
+                    }
+                    if (this.activeDataType === 'expense') {
+                        dayTotal = item.expense;
+                    }
                 }
                 maxValue = Math.max(maxValue, dayTotal);
             });
 
             // Add 10% padding to max value
-            maxValue = maxValue * 1;
+            maxValue = maxValue * 1.1;
 
             // Scale functions
             const xScale = (index) => {
@@ -365,7 +372,7 @@ export default {
                     bar.setAttribute('y', yScale(item.expense));
                     bar.setAttribute('width', barWidth);
                     bar.setAttribute('height', height - padding.bottom - yScale(item.expense));
-                    bar.setAttribute('fill', 'rgba(239, 68, 68, 0.8)'); // Semi-transparent Red
+                    bar.setAttribute('fill', 'rgba(239, 68, 68, 0.9)'); // Semi-transparent Red
                     bar.setAttribute('rx', '2');
                     bar.setAttribute('ry', '2');
 
@@ -383,7 +390,7 @@ export default {
                     bar.setAttribute('y', yScale(item.income));
                     bar.setAttribute('width', barWidth);
                     bar.setAttribute('height', height - padding.bottom - yScale(item.income));
-                    bar.setAttribute('fill', 'rgba(16, 185, 129, 0.8)'); // Semi-transparent Green
+                    bar.setAttribute('fill', 'rgba(16, 185, 129, 0.9)'); // Semi-transparent Green
                     bar.setAttribute('rx', '2');
                     bar.setAttribute('ry', '2');
 
