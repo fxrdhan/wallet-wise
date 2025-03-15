@@ -250,27 +250,31 @@
                     </div>
                 </div>
             </div>
-
+            
             <div v-else class="text-center p-12 text-gray-500">
                 <i class="fas fa-chart-pie text-5xl mb-4 text-gray-300"></i>
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Transaksi</h3>
                 <p class="text-gray-500 mb-4">Tambahkan transaksi pertama Anda dengan menekan tombol + di bawah</p>
                 <button @click="addTransaction"
-                    class="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
-                    <i class="fas fa-plus mr-2"></i> Tambah Transaksi
-                </button>
-            </div>
+                class="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-plus mr-2"></i> Tambah Transaksi
+            </button>
         </div>
+    </div>
+    <div v-if="hasTransactions" class="mt-6">
+        <TimeSeriesGraph />
+    </div>
     </div>
 </template>
 
 <script>
 import { MenuItem } from '@headlessui/vue'
 import DropdownMenu from '../components/DropdownMenu.vue'
+import TimeSeriesGraph from '@/components/TimeSeriesGraph.vue'
 
 export default {
     name: 'StatisticsView',
-    components: { MenuItem, DropdownMenu },
+    components: { MenuItem, DropdownMenu, TimeSeriesGraph },
     data() {
         return {
             timeRange: 'thisMonth',

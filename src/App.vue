@@ -48,7 +48,7 @@ export default {
   methods: {
     checkScreenSize() {
       this.screenWidth = window.innerWidth;
-      this.isDesktop = this.screenWidth >= 768; // 768px adalah breakpoint untuk md: di Tailwind
+      this.isDesktop = this.screenWidth >= 7768; // 768px adalah breakpoint untuk md: di Tailwind
     }
   }
 }
