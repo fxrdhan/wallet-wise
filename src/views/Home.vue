@@ -7,12 +7,9 @@
             <div class="bg-gradient-to-r from-green-500/90 to-green-600/80 rounded-xl shadow-sm p-4 sm:p-5 card-hover transition-all mb-4 relative overflow-hidden">
                 <div class="flex justify-between items-center h-full relative z-10">
                     <div class="flex-1">
-                        <h2 class="text-base sm:text-lg font-semibold text-white">Saldo Saat Ini</h2>
+                        <h2 class="text-base sm:text-lg font-semibold text-white mb-4">Saldo Saat Ini</h2>
                         <p class="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 text-white">Rp {{ formatNumber(totalBalance) }}</p>
                         <p class="text-xs sm:text-sm text-green-100 mt-1" v-if="isClient">Update terakhir: {{ lastUpdate }}</p>
-                    </div>
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center flex-shrink-0 ml-3 relative z-10">
-                        <i class="fas fa-wallet text-green-500 text-lg sm:text-xl"></i>
                     </div>
                 </div>
                 <i class="fas fa-wallet text-green-400/20 absolute -bottom-2 -right-2 text-8xl"></i>
