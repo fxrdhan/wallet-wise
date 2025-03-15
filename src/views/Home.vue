@@ -95,23 +95,23 @@
         <div v-if="recentTransactions.length > 0" 
             class="bg-white rounded-xl shadow-md p-6 card-hover transition-all relative overflow-hidden">
             <div class="flex items-center justify-between mb-6 relative z-10">
-                <h2 class="text-xl font-semibold text-gray-800">Transaksi Terbaru</h2>
-                <router-link to="/history" class="text-green-600 text-sm hover:underline">
+                <h2 class="text-lg font-semibold text-gray-800">Transaksi Terbaru</h2>
+                <router-link to="/history" class="text-green-600 text-xs hover:underline">
                     <i class="fas fa-arrow-right mr-1"></i>Lihat Semua
                 </router-link>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <div v-for="transaction in recentTransactions" :key="transaction.id"
-                    class="p-4 border border-gray-100 rounded-lg flex justify-between items-center">
+                    class="p-3 border border-gray-100 rounded-lg flex justify-between items-center">
                     <div class="flex items-center">
                         <div :class="getTypeIconClass(transaction.type)"
-                            class="w-10 h-10 rounded-full flex items-center justify-center mr-4">
-                            <i :class="getTypeIcon(transaction.type)" class="text-white"></i>
+                            class="w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                            <i :class="getTypeIcon(transaction.type)" class="text-white text-xs"></i>
                         </div>
                         <div>
-                            <h3 class="font-medium">{{ transaction.description }}</h3>
-                            <p class="text-sm text-gray-500 mb-1">
+                            <h3 class="font-medium text-sm">{{ transaction.description }}</h3>
+                            <p class="text-xs text-gray-500 mb-1">
                                 {{ formatDateSimple(transaction.date) }}  
                             </p>
                             <p class="text-xs text-gray-500 flex items-center">
@@ -124,7 +124,7 @@
                             </p>
                         </div>
                     </div>
-                    <div :class="getAmountClass(transaction.type)" class="text-lg font-bold whitespace-nowrap">
+                    <div :class="getAmountClass(transaction.type)" class="text-sm font-bold whitespace-nowrap">
                         {{ getAmountPrefix(transaction.type) }} {{ formatNumber(getTransactionTotal(transaction)) }}
                     </div>
                 </div>
@@ -133,10 +133,10 @@
 
         <div v-else class="bg-white rounded-xl shadow-md p-6 card-hover transition-all text-center">
             <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Transaksi</h3>
-            <p class="text-gray-500 mb-4">Tambahkan transaksi pertama Anda dengan menekan tombol + di bawah</p>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Belum Ada Transaksi</h3>
+            <p class="text-gray-500 mb-4 text-sm">Tambahkan transaksi pertama Anda dengan menekan tombol + di bawah</p>
             <button @click="addTransaction"
-                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center text-sm">
                 <i class="fas fa-plus mr-2"></i> Tambah Transaksi
             </button>
         </div>
