@@ -360,8 +360,39 @@ export default {
                     svg.appendChild(label);
                 }
 
-                // Expense bar (render first)
-                if ((this.activeDataType === 'expense' || this.activeDataType === 'both') && item.expense > 0) {
+                // Get instance methods for tooltip
+                const showTooltip = this.showTooltip.bind(this);
+                const hideTooltip = this.hideTooltip.bind(this);
+
+                // Determine which bar is higher (lower y value in SVG)
+                const incomeY = yScale(item.income);
+                const expenseY = yScale(item.expense);
+                const incomeIsHigher = incomeY < expenseY;
+
+                // We only need to worry about the order if both types are visible and we're showing both
+                if (this.activeDataType === 'both' && item.income > 0 && item.expense > 0) {
+                    // Render the higher bar first (to be behind), then the shorter bar
+                    if (incomeIsHigher) {
+                        // Income is higher, render income first (at the back), then expense
+                        renderIncomeBar();
+                        renderExpenseBar();
+                    } else {
+                        // Expense is higher, render expense first (at the back), then income
+                        renderExpenseBar();
+                        renderIncomeBar();
+                    }
+                } else {
+                    // If we're only showing one type or one of the values is zero, just render them normally
+                    if ((this.activeDataType === 'expense' || this.activeDataType === 'both') && item.expense > 0) {
+                        renderExpenseBar();
+                    }
+                    if ((this.activeDataType === 'income' || this.activeDataType === 'both') && item.income > 0) {
+                        renderIncomeBar();
+                    }
+                }
+
+                // Helper function to render expense bar
+                function renderExpenseBar() {
                     const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     bar.setAttribute('x', xScale(index) - barWidth / 2 + leftOffset);
                     bar.setAttribute('y', yScale(item.expense));
@@ -372,14 +403,14 @@ export default {
                     bar.setAttribute('ry', '2');
 
                     // Add tooltip on hover
-                    bar.addEventListener('mouseover', (e) => this.showTooltip(e, item, 'expense'));
-                    bar.addEventListener('mouseout', this.hideTooltip);
+                    bar.addEventListener('mouseover', (e) => showTooltip(e, item, 'expense'));
+                    bar.addEventListener('mouseout', hideTooltip);
 
                     svg.appendChild(bar);
                 }
 
-                // Income bar (render last to appear on top)
-                if ((this.activeDataType === 'income' || this.activeDataType === 'both') && item.income > 0) {
+                // Helper function to render income bar
+                function renderIncomeBar() {
                     const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     bar.setAttribute('x', xScale(index) - barWidth / 2 + leftOffset);
                     bar.setAttribute('y', yScale(item.income));
@@ -390,8 +421,8 @@ export default {
                     bar.setAttribute('ry', '2');
 
                     // Add tooltip on hover
-                    bar.addEventListener('mouseover', (e) => this.showTooltip(e, item, 'income'));
-                    bar.addEventListener('mouseout', this.hideTooltip);
+                    bar.addEventListener('mouseover', (e) => showTooltip(e, item, 'income'));
+                    bar.addEventListener('mouseout', hideTooltip);
 
                     svg.appendChild(bar);
                 }
